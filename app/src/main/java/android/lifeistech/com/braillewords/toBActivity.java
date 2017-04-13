@@ -26,6 +26,7 @@ public class toBActivity extends AppCompatActivity {
             'わ','ゐ','ゑ','を',
             'ん','っ','ー',
             '。','、','・','？','！',
+            
     };
 
     private int[] res = {
