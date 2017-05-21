@@ -19,8 +19,8 @@ public class toJActivity extends AppCompatActivity {
 
     int[] flag1 = new int[6];
     int[] flag2 = new int[6];
-    String s = ""; //String型の初期化
-    String copy = ""; //String型の初期化
+    String s = "";      //String型の初期化
+    String copy = "";   //String型の初期化
 
     int field = 0;//使用フィールド
 
