@@ -1,11 +1,9 @@
 package android.lifeistech.com.braillewords;
 
-/**
- * Created by RyotaTomiyama on 17/02/19.
- */
 public class Braille {
 
     private String code;
+    private int weight;
     private char japanese;
     private int res;
 
@@ -15,6 +13,15 @@ public class Braille {
     Braille(String code, char japanese) {
         this.code = code;
         this.japanese = japanese;
+    }
+
+    Braille(char japanese,int weight) {
+        this.japanese = japanese;
+        this.weight = weight;
+    }
+
+    public int getWeight() {
+        return weight;
     }
 
     Braille(int res, char japanese) {
