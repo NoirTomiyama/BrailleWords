@@ -4,19 +4,29 @@ public class Braille {
 
     private String code;
     private int weight;
-    private char japanese;
+    private char c_japanese;
+    private String s_japanese;
     private int res;
+    private String number;
 
     Braille() {
     }
 
-    Braille(String code, char japanese) {
-        this.code = code;
-        this.japanese = japanese;
+    Braille(int weight,String number) {
+        this.number = number;
+        this.weight = weight;
     }
 
-    Braille(char japanese,int weight) {
-        this.japanese = japanese;
+    public String getNumber() {
+        return number;
+    }
+    Braille(String code, char japanese) {
+        this.code = code;
+        this.c_japanese = japanese;
+    }
+
+    Braille(String japanese,int weight) {
+        this.s_japanese = japanese;
         this.weight = weight;
     }
 
@@ -26,15 +36,19 @@ public class Braille {
 
     Braille(int res, char japanese) {
         this.res = res;
-        this.japanese = japanese;
+        this.c_japanese = japanese;
     }
 
     public String getCode() {
         return code;
     }
 
-    public char getJapanese() {
-        return japanese;
+    public char getC_japanese() {
+        return c_japanese;
+    }
+
+    public String getS_japanese() {
+        return s_japanese;
     }
 
     public int getRes(){

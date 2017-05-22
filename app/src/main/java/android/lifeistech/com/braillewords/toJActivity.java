@@ -19,27 +19,49 @@ public class toJActivity extends AppCompatActivity {
     public final static int FIELD_LEFT = 0;
     public final static int FIELD_RIGHT = 1;
 
-    TextView toJResult; //翻訳結果
+    //数字入力モード
+    public final static boolean NUMMODE_ON = true;
+    public final static boolean NUMMODE_OFF = false;
 
+    //翻訳結果(今までの保持する)
+    TextView toJResult;
+
+    //数字入力中テキスト
+    TextView inputNum;
+
+    //押下判定
     int[] flag1 = new int[6];
     int[] flag2 = new int[6];
 
-    String s = "";      //String型の初期化
+    //現在の翻訳テキスト
+    String translatedText = "";
+
+    //追加テキスト
+    String addText = "";
+
     String copy = "";   //String型の初期化
 
     //重み格納変数
-    int temp = 0;
+    int weight = 0;
 
-    int field = 0;//使用フィールド
+    //使用フィールド
+    int field = 0;
 
-    char[] charArray = new char[256]; //char型配列256用意
+    //数字入力モード判定
+    boolean numMode;
 
-    int total=0; //現在の単語数
+//    //char型配列256用意
+//    char[] charArray = new char[256];
 
-    LinearLayout linearLayout1; //左使用フィールド
-    LinearLayout linearLayout2; //右使用フィールド
+//    int total=0; //現在の単語数
 
-    public static Braille[] brailles;
+    LinearLayout linearLayout_left; //左使用フィールド
+    LinearLayout linearLayout_right; //右使用フィールド
+
+    //50音が主に入る．
+    public static Braille[] brailles1;
+    //数字系がおもに入る．
+    public static Braille[] brailles2;
 
 //    private String[] codes = {
 //            "100000","101000","110000","111000","011000",   //あ行
@@ -56,7 +78,7 @@ public class toJActivity extends AppCompatActivity {
 //            "001101","000101","000100","001001","001110"    //。、・？！
 //    };
 
-        private int[] weights = {
+    private int[] weights1 = {
             1,3,9,11,10,        //あ行
             33,35,41,43,42,     //か行
             49,51,57,59,58,     //さ行
@@ -71,20 +93,29 @@ public class toJActivity extends AppCompatActivity {
             50,48,16,34,22      //。、・？！
     };
 
+    //weight = 60のとき，数字入力モード
 
-    private char[] japaneses = {
-            'あ','い','う','え','お',
-            'か','き','く','け','こ',
-            'さ','し','す','せ','そ',
-            'た','ち','つ','て','と',
-            'な','に','ぬ','ね','の',
-            'は','ひ','ふ','へ','ほ',
-            'ま','み','む','め','も',
-            'や','ゆ','よ',
-            'ら','り','る','れ','ろ',
-            'わ','ゐ','ゑ','を',
-            'ん','っ','ー',
-            '。','、','・','？','！'
+    private String[] japaneses = {
+            "あ","い","う","え","お",
+            "か","き","く","け","こ",
+            "さ","し","す","せ","そ",
+            "た","ち","つ","て","と",
+            "な","に","ぬ","ね","の",
+            "は","ひ","ふ","へ","ほ",
+            "ま","み","む","め","も",
+            "や","ゆ","よ",
+            "ら","り","る","れ","ろ",
+            "わ","ゐ","ゑ","を",
+            "ん","っ","ー",
+            "。","、","・","？","！"
+    };
+
+    private String [] numbers = {
+            "0","1","2","3","4","5","6","7","8","9",".",","
+    };
+
+    private int[] weights2 = {
+            26,1,3,9,25,17,11,27,19,10,2,4
     };
 
 
@@ -94,28 +125,79 @@ public class toJActivity extends AppCompatActivity {
         setContentView(R.layout.activity_to_j);
 
         toJResult=(TextView)findViewById(R.id.toJResult);
-        linearLayout1=(LinearLayout)findViewById(R.id.linearLayout1);
-        linearLayout2=(LinearLayout)findViewById(R.id.linearLayout2);
+        linearLayout_left=(LinearLayout)findViewById(R.id.linearLayout1);
+        linearLayout_right=(LinearLayout)findViewById(R.id.linearLayout2);
 
         //flag1,2の初期化
+        both_flags_reset();
+        both_background_reset();
+
+        //braillesの初期化
+        brailles1 = new Braille[64];
+        for(int i = 0;i<weights1.length;i++){
+            Braille braille1 = new Braille(japaneses[i],weights1[i]);
+            brailles1[i] = braille1;
+        }
+
+        brailles2 = new Braille[64];
+        for(int i = 0;i<weights2.length;i++){
+            Braille braille2 = new Braille(weights2[i],numbers[i]);
+            brailles2[i] = braille2;
+        }
+
+        numMode = false;
+        inputNum = (TextView)findViewById(R.id.inputNum);
+        inputNum.setVisibility(View.INVISIBLE);
+
+    }
+
+    public void both_flags_reset() {
         for (int i = 0; i < 6; i++) {
             flag1[i] = 0;
             flag2[i] = 0;
         }
 
-        //braillesの初期化
-        brailles = new Braille[55];
-        for(int i = 0;i<weights.length;i++){
-            Braille braille = new Braille(japaneses[i],weights[i]);
-            brailles[i] = braille;
-        }
+        this.findViewById(R.id.button1).setActivated(false);
+        this.findViewById(R.id.button2).setActivated(false);
+        this.findViewById(R.id.button3).setActivated(false);
+        this.findViewById(R.id.button4).setActivated(false);
+        this.findViewById(R.id.button5).setActivated(false);
+        this.findViewById(R.id.button6).setActivated(false);
+        this.findViewById(R.id.button7).setActivated(false);
+        this.findViewById(R.id.button8).setActivated(false);
+        this.findViewById(R.id.button9).setActivated(false);
+        this.findViewById(R.id.button10).setActivated(false);
+        this.findViewById(R.id.button11).setActivated(false);
+        this.findViewById(R.id.button12).setActivated(false);
+
     }
 
-    
+    public void both_background_reset(){
+        linearLayout_left.setBackgroundColor(Color.parseColor("#00000000"));
+        linearLayout_right.setBackgroundColor(Color.parseColor("#00000000"));
+    }
+
+    public void left_background_reset(){
+        linearLayout_left.setBackgroundColor(Color.parseColor("#00000000"));
+        linearLayout_right.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
+    }
+
+    public void right_background_reset(){
+        linearLayout_left.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
+        linearLayout_right.setBackgroundColor(Color.parseColor("#00000000"));
+    }
+
     public void button1(View v) {
-        //仕様フィールド判定
+
+        right_background_reset();
+
+        //使用フィールド判定
         if(field == FIELD_RIGHT){
-            reset2();
+            reset_right();
+
+            //使用フィールド変更の際に加える．
+            translatedText += addText;
+
             field = FIELD_LEFT;
         }
 
@@ -128,14 +210,19 @@ public class toJActivity extends AppCompatActivity {
             flag1[0] = 0;
         }
 
-        //判定
+        //翻訳判定
         judge();
     }
 
     public void button2(View v) {
 
+        right_background_reset();
+
         if(field == FIELD_RIGHT){
-            reset2();
+            reset_right();
+
+            translatedText += addText;
+
             field = FIELD_LEFT;
         }
 
@@ -152,8 +239,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button3(View v) {
 
+        right_background_reset();
+
         if(field == FIELD_RIGHT){
-            reset2();
+            reset_right();
+
+            translatedText += addText;
+
             field = FIELD_LEFT;
         }
 
@@ -170,8 +262,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button4(View v) {
 
+        right_background_reset();
+
         if(field == FIELD_RIGHT){
-            reset2();
+            reset_right();
+
+            translatedText += addText;
+
             field = FIELD_LEFT;
         }
 
@@ -188,8 +285,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button5(View v) {
 
+        right_background_reset();
+
         if(field == FIELD_RIGHT){
-            reset2();
+            reset_right();
+
+            translatedText += addText;
+
             field = FIELD_LEFT;
         }
 
@@ -206,8 +308,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button6(View v) {
 
+        right_background_reset();
+
         if(field == FIELD_RIGHT){
-            reset2();
+            reset_right();
+
+            translatedText += addText;
+
             field = FIELD_LEFT;
         }
 
@@ -224,8 +331,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button7(View v) {
 
+        left_background_reset();
+
         if(field == FIELD_LEFT){
-            reset1();
+            reset_left();
+
+            translatedText += addText;
+
             field = FIELD_RIGHT;
         }
 
@@ -242,8 +354,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button8(View v) {
 
+        left_background_reset();
+
         if(field == FIELD_LEFT){
-            reset1();
+            reset_left();
+
+            translatedText += addText;
+
             field = FIELD_RIGHT;
         }
 
@@ -260,8 +377,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button9(View v) {
 
+        left_background_reset();
+
         if(field == FIELD_LEFT){
-            reset1();
+            reset_left();
+
+            translatedText += addText;
+
             field = FIELD_RIGHT;
         }
 
@@ -278,8 +400,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button10(View v) {
 
+        left_background_reset();
+
         if(field == FIELD_LEFT){
-            reset1();
+            reset_left();
+
+            translatedText += addText;
+
             field = FIELD_RIGHT;
         }
 
@@ -296,8 +423,13 @@ public class toJActivity extends AppCompatActivity {
 
     public void button11(View v) {
 
+        left_background_reset();
+
         if(field == FIELD_LEFT){
-            reset1();
+            reset_left();
+
+            translatedText += addText;
+
             field = FIELD_RIGHT;
         }
 
@@ -315,8 +447,11 @@ public class toJActivity extends AppCompatActivity {
 
     public void button12(View v) {
 
+        left_background_reset();
+
         if(field == FIELD_LEFT){
-            reset1();
+            reset_left();
+            translatedText += addText;
             field = FIELD_RIGHT;
         }
 
@@ -328,19 +463,25 @@ public class toJActivity extends AppCompatActivity {
             flag2[5] = 0;
         }
 
-        judge();
+        if(numMode == NUMMODE_OFF){
+            judge();
+        }else if(numMode == NUMMODE_ON){
+            judgeNum();
+        }
+
     }
 
-    public void judge(){ //判定
+    public void weight_calc(){
 
-        //使用フィールド,String sに格納
+        weight = 0;
+
+        //重み計算
         if(field == FIELD_LEFT){
-            //重み計算
+
             for(int i=0;i<6;i++){
                 //s+= "" + flag1[i];
-                temp += Math.pow(2,i) * flag1[i];
+                weight += Math.pow(2,i) * flag1[i];
             }
-
 //            temp = 1 * flag1[0]
 //                    + 2 * flag1[1]
 //                    + 4 * flag1[2]
@@ -348,53 +489,72 @@ public class toJActivity extends AppCompatActivity {
 //                    +16 * flag1[4]
 //                    +32 * flag1[5];
 
-            //使用フィールドにsetColor
-            linearLayout1.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
-            linearLayout2.setBackgroundColor(Color.parseColor("#00000000"));
-
         }else if(field == FIELD_RIGHT){
             for(int i=0;i<6;i++){
-                temp += Math.pow(2,i) * flag2[i];
-            }
-            //使用フィールドにsetColor
-            linearLayout1.setBackgroundColor(Color.parseColor("#00000000"));
-            linearLayout2.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
-        }
-
-        for(int i = 0;i < weights.length;i++){
-            System.out.println("temp = " + temp);
-            //System.out.println("brailles = " + brailles[i].getCode());
-
-            if(temp == brailles[i].getWeight()){
-                charArray[total] = brailles[i].getJapanese();
-                System.out.println("brailles = " + brailles[i].getCode());
-                break;
-            }else{
-                charArray[total]='\u0000';
+                weight += Math.pow(2,i) * flag2[i];
             }
         }
 
-        s = String.valueOf(charArray);
-
-        toJResult.setText(s);
-
-        if(temp==0){
-            linearLayout1.setBackgroundColor(Color.parseColor("#00000000"));
-            linearLayout2.setBackgroundColor(Color.parseColor("#00000000"));
-        }
-
-
-        System.out.println(charArray.length);
-
-        //初期化
-        temp=0;
-        s = "";
     }
 
-    public void reset1(){ //Table1削除用
+    public void judgeNum() {
+        addText = "";
+
+        //数符 + 数符のエラー処理
+
+
+    }
+
+
+    public void judge(){ //翻訳判定
+
+        addText = "";
+
+        //重み計算
+        weight_calc();
+
+        //数字モードかどうか判定
+
+        if(weight == 60){
+            numMode = NUMMODE_ON;
+            inputNum.setVisibility(View.VISIBLE);
+            addText = "";
+            toJResult.setText(translatedText);
+        }else{
+            numMode = NUMMODE_OFF;
+            inputNum.setVisibility(View.INVISIBLE);
+        }
+
+        if(numMode == NUMMODE_OFF){
+            for(int i = 0;i < weights1.length;i++){
+                System.out.println("weight = " + weight);
+                //System.out.println("brailles = " + brailles[i].getCode());
+
+                if(weight == brailles1[i].getWeight()){
+                    addText = brailles1[i].getS_japanese();
+                    System.out.println("brailles = " + brailles1[i].getS_japanese());
+                    break;
+                }else{
+                    addText="";
+                }
+            }
+            toJResult.setText(translatedText + addText);
+        }
+
+
+
+        if(weight==0){
+            both_background_reset();
+        }
+
+    }
+
+    public void reset_left(){ //Table1削除用
+
         for(int j=0;j<6;j++){
             flag1[j]=0;
         }
+
         this.findViewById(R.id.button1).setActivated(false);
         this.findViewById(R.id.button2).setActivated(false);
         this.findViewById(R.id.button3).setActivated(false);
@@ -402,11 +562,12 @@ public class toJActivity extends AppCompatActivity {
         this.findViewById(R.id.button5).setActivated(false);
         this.findViewById(R.id.button6).setActivated(false);
 
-        //移った段階で，total変数をプラス．
-        total++;
+//        //移った段階で，total変数をプラス．
+//        total++;
     }
 
-    public void reset2(){ //Table2削除用
+    public void reset_right(){ //Table2削除用
+
         for(int j=0;j<6;j++){
             flag2[j]=0;
         }
@@ -417,91 +578,62 @@ public class toJActivity extends AppCompatActivity {
         this.findViewById(R.id.button11).setActivated(false);
         this.findViewById(R.id.button12).setActivated(false);
 
-        //移った段階で，total変数をプラス．
-        total++;
+//        //移った段階で，total変数をプラス．
+//        total++;
     }
 
     public void del1(View v){ //一文字削除
 
-        s="";
-
-        if(total>=0){
-            charArray[total]='\u0000';
-            s = String.valueOf(charArray);
-
-            toJResult.setText(s);
-
-            total--;
-            if(field==FIELD_LEFT){
-                reset1();
-            }else if(field==FIELD_RIGHT){
-                reset2();
+        if(translatedText.length() > 0) {
+            if(addText.isEmpty()){
+                translatedText = translatedText.substring(0, translatedText.length()-1);
+            }else{
+                translatedText += addText;
+                translatedText = translatedText.substring(0, translatedText.length()-1);
+                addText = "";
             }
-
-            linearLayout1.setBackgroundColor(Color.parseColor("#00000000"));
-            linearLayout2.setBackgroundColor(Color.parseColor("#00000000"));
-
-            //リセットで＋されてしまうため
-            total--;
         }
 
-        if(total == 0){
-            toJResult.setText("");
-        }
+        toJResult.setText(translatedText);
 
-        //初期化
-        s="";
+        both_background_reset();
+        both_flags_reset();
 
     }
 
-    public void delAll(View v){ //トータルがマイナスのときのエラー処理
+    public void delAll(View v){
 
-        s="";
+        both_background_reset();
+        both_flags_reset();
 
-        for(int j = 0;j<=total;j++){
-            charArray[j]='\u0000';
-        }
-
-        s = String.valueOf(charArray);
-
-        if(s.isEmpty()){
-            toJResult.setText("");
-        }else{
-            toJResult.setText(s);
-        }
-
-        reset1();
-        reset2();
-        total=0;
+        addText = "";
+        translatedText = "";
 
         toJResult.setText("");
-
-
     }
 
     public void copy(View v){
 
-        copy = String.valueOf(charArray); //今
+        copy = translatedText + addText; //今
 
-        //クリップボードに格納するItemを作成
-        ClipData.Item item = new ClipData.Item(copy);
+        if(!copy.isEmpty()){
+            //クリップボードに格納するItemを作成
+            ClipData.Item item = new ClipData.Item(copy);
 
-        //MIMETYPEの作成
-        String[] mimeType = new String[1];
-        mimeType[0] = ClipDescription.MIMETYPE_TEXT_PLAIN;
+            //MIMETYPEの作成
+            String[] mimeType = new String[1];
+            mimeType[0] = ClipDescription.MIMETYPE_TEXT_PLAIN;
 
-        //クリップボードに格納するClipDataオブジェクトの作成
-        ClipData cd = new ClipData(new ClipDescription("text_data", mimeType), item);
+            //クリップボードに格納するClipDataオブジェクトの作成
+            ClipData cd = new ClipData(new ClipDescription("text_data", mimeType), item);
 
-        //クリップボードにデータを格納
-        ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        cm.setPrimaryClip(cd);
+            //クリップボードにデータを格納
+            ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            cm.setPrimaryClip(cd);
 
-        Toast.makeText(this,"クリップボードにコピーしました.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"クリップボードにコピーしました.", Toast.LENGTH_LONG).show();
+        }
     }
-
-
-
 }
 
 

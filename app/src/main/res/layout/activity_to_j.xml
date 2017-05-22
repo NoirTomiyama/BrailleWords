@@ -14,12 +14,12 @@
 
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_weight="1"
         android:text="翻訳結果"
-        android:id="@+id/textView4"
-        android:layout_weight="1" />
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
 
     <TextView
             android:layout_width="wrap_content"
@@ -32,6 +32,13 @@
             android:textAppearance="@android:style/TextAppearance.Large"
         android:layout_weight="1"
         android:onClick="copy" />
+
+    <TextView
+        android:id="@+id/inputNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="数字入力中(次に入力する文字から数字になります)"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -98,45 +105,14 @@
                     android:background="#00000000" />
 
                 <ImageButton
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button2"
-                    android:layout_weight="1"
-                    android:onClick="button2"
-                    android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:weightSum="2"
-                android:background="#00000000">
-
-                <ImageButton
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button3"
-                    android:layout_weight="1"
-                    android:onClick="button3"
-                    android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
-
-                <ImageButton
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="New Button"
                     android:id="@+id/button4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="#00000000"
                     android:onClick="button4"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:text="New Button"/>
             </LinearLayout>
 
             <LinearLayout
@@ -148,15 +124,46 @@
                 android:background="#00000000">
 
                 <ImageButton
+                    android:id="@+id/button2"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button5"
                     android:layout_weight="1"
+                    android:background="#00000000"
+                    android:onClick="button2"
+                    android:src="@drawable/buttonchange"
+                    android:text="New Button"/>
+
+                <ImageButton
+                    android:id="@+id/button5"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#00000000"
                     android:onClick="button5"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:text="New Button"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:weightSum="2"
+                android:background="#00000000">
+
+                <ImageButton
+                    android:id="@+id/button3"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#00000000"
+                    android:onClick="button3"
+                    android:src="@drawable/buttonchange"
+                    android:text="New Button"/>
 
                 <ImageButton
                     style="?android:attr/buttonStyleSmall"
@@ -205,46 +212,15 @@
                     android:background="#00000000" />
 
                 <ImageButton
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button8"
-                    android:layout_weight="1"
-                    android:onClick="button8"
-                    android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:weightSum="2"
-                android:background="#00000000">
-
-                <ImageButton
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button9"
-                    android:layout_weight="1"
-                    android:onClick="button9"
-                    android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
-
-                <ImageButton
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="New Button"
                     android:id="@+id/button10"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="#00000000"
                     android:onClick="button10"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:text="New Button"/>
             </LinearLayout>
 
             <LinearLayout
@@ -256,15 +232,46 @@
                 android:background="#00000000">
 
                 <ImageButton
+                    android:id="@+id/button8"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button11"
                     android:layout_weight="1"
+                    android:background="#00000000"
+                    android:onClick="button8"
+                    android:src="@drawable/buttonchange"
+                    android:text="New Button"/>
+
+                <ImageButton
+                    android:id="@+id/button11"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#00000000"
                     android:onClick="button11"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:text="New Button"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:weightSum="2"
+                android:background="#00000000">
+
+                <ImageButton
+                    android:id="@+id/button9"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#00000000"
+                    android:onClick="button9"
+                    android:src="@drawable/buttonchange"
+                    android:text="New Button"/>
 
                 <ImageButton
                     style="?android:attr/buttonStyleSmall"
