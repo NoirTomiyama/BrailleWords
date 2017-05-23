@@ -259,13 +259,16 @@ public class toJActivity extends AppCompatActivity {
         System.out.println("(button_left)numMode2:"+numMode);
         System.out.println("(button_left)numCount2:" + numCount);
 
-        if((numMode == NUMMODE_OFF)||(numCount == 4)||(numCount < 0)){
+        if((numMode == NUMMODE_OFF)||(numCount >= 4)||(numCount < 0)){
             temp_length = -1;
             numCount = 0;
             numMode = NUMMODE_OFF;
             judge();
         }else if(numMode == NUMMODE_ON){
-            //TODO 4文字を数える処理，削除した際のエラー処理，消去時のモード変更
+            // 4文字を数える処理，
+            // 削除した際のエラー処理，
+            // 消去時のモード変更
+
             if(temp_length == -1){
                 temp_length = translatedText.length();
             }
@@ -338,7 +341,7 @@ public class toJActivity extends AppCompatActivity {
             numMode = NUMMODE_OFF;
             judge();
         }else if(numMode == NUMMODE_ON){
-            //TODO 4文字を数える処理，削除した際のエラー処理、消去時のモード変更
+
             if(temp_length == -1){
                 temp_length = translatedText.length();
             }
@@ -377,7 +380,7 @@ public class toJActivity extends AppCompatActivity {
     public void judgeNum() {
         addText = "";
 
-        //TODO 数符 + 数符のエラー処理 アラートダイアログとか出すべきかな〜
+        //TODO 数符 + 数符のエラー処理 アラートダイアログとか出すべきかな〜，句点読点の処理，50音に加えて，ゃなどの実装．
         //点字がないときどうするか考えねば．
         //空白検知しないといけないかもしれない．https://www.slideshare.net/EijiSato/ss-47944764
 
