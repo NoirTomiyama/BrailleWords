@@ -44,7 +44,7 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="0.09">
 
         <Button
             android:layout_width="wrap_content"
@@ -93,16 +93,17 @@
                 android:background="#00000000">
 
                 <ImageButton
+                    android:id="@+id/button1"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button1"
                     android:layout_weight="1"
+                    android:background="#00000000"
+                    android:onClick="button_left"
                     android:scaleType="center"
-                    android:onClick="button1"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:tag="0"
+                    android:text="New Button"/>
 
                 <ImageButton
                     android:id="@+id/button4"
@@ -110,8 +111,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button4"
+                    android:onClick="button_left"
                     android:src="@drawable/buttonchange"
+                    android:tag="3"
                     android:text="New Button"/>
             </LinearLayout>
 
@@ -130,8 +132,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button2"
+                    android:onClick="button_left"
                     android:src="@drawable/buttonchange"
+                    android:tag="1"
                     android:text="New Button"/>
 
                 <ImageButton
@@ -141,8 +144,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button5"
+                    android:onClick="button_left"
                     android:src="@drawable/buttonchange"
+                    android:tag="4"
                     android:text="New Button"/>
             </LinearLayout>
 
@@ -161,20 +165,22 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button3"
+                    android:onClick="button_left"
                     android:src="@drawable/buttonchange"
+                    android:tag="2"
                     android:text="New Button"/>
 
                 <ImageButton
+                    android:id="@+id/button6"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button6"
                     android:layout_weight="1"
-                    android:onClick="button6"
+                    android:background="#00000000"
+                    android:onClick="button_left"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:tag="5"
+                    android:text="New Button"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -201,15 +207,16 @@
                 android:background="#00000000">
 
                 <ImageButton
+                    android:id="@+id/button7"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button7"
                     android:layout_weight="1"
-                    android:onClick="button7"
+                    android:background="#00000000"
+                    android:onClick="button_right"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:tag="0"
+                    android:text="New Button"/>
 
                 <ImageButton
                     android:id="@+id/button10"
@@ -218,8 +225,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button10"
+                    android:onClick="button_right"
                     android:src="@drawable/buttonchange"
+                    android:tag="3"
                     android:text="New Button"/>
             </LinearLayout>
 
@@ -238,8 +246,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button8"
+                    android:onClick="button_right"
                     android:src="@drawable/buttonchange"
+                    android:tag="1"
                     android:text="New Button"/>
 
                 <ImageButton
@@ -249,8 +258,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button11"
+                    android:onClick="button_right"
                     android:src="@drawable/buttonchange"
+                    android:tag="4"
                     android:text="New Button"/>
             </LinearLayout>
 
@@ -269,20 +279,22 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:onClick="button9"
+                    android:onClick="button_right"
                     android:src="@drawable/buttonchange"
+                    android:tag="2"
                     android:text="New Button"/>
 
                 <ImageButton
+                    android:id="@+id/button12"
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="New Button"
-                    android:id="@+id/button12"
                     android:layout_weight="1"
-                    android:onClick="button12"
+                    android:background="#00000000"
+                    android:onClick="button_right"
                     android:src="@drawable/buttonchange"
-                    android:background="#00000000" />
+                    android:tag="5"
+                    android:text="New Button"/>
             </LinearLayout>
         </LinearLayout>
 

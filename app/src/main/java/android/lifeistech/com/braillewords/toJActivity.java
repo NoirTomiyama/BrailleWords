@@ -23,6 +23,10 @@ public class toJActivity extends AppCompatActivity {
     public final static boolean NUMMODE_ON = true;
     public final static boolean NUMMODE_OFF = false;
 
+    //ボタン押されたかどうか
+    public final static int BUTTON_ON = 1;
+    public final static int BUTTON_OFF = 0;
+
     //翻訳結果(今までの保持する)
     TextView toJResult;
 
@@ -39,6 +43,7 @@ public class toJActivity extends AppCompatActivity {
     //追加テキスト
     String addText = "";
 
+    //コピー時に使用
     String copy = "";   //String型の初期化
 
     //重み格納変数
@@ -50,10 +55,9 @@ public class toJActivity extends AppCompatActivity {
     //数字入力モード判定
     boolean numMode;
 
-//    //char型配列256用意
-//    char[] charArray = new char[256];
-
-//    int total=0; //現在の単語数
+    //数字入力制限(4まで)
+    int temp_length = -1;
+    int numCount = 0;
 
     LinearLayout linearLayout_left; //左使用フィールド
     LinearLayout linearLayout_right; //右使用フィールド
@@ -118,6 +122,10 @@ public class toJActivity extends AppCompatActivity {
             26,1,3,9,25,17,11,27,19,10,2,4
     };
 
+    //id保持用配列
+    int[] idList_left;
+    int[] idList_right;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +156,9 @@ public class toJActivity extends AppCompatActivity {
         numMode = false;
         inputNum = (TextView)findViewById(R.id.inputNum);
         inputNum.setVisibility(View.INVISIBLE);
+
+        idList_left = new int[]{R.id.button1,R.id.button2,R.id.button3,R.id.button4,R.id.button5,R.id.button6};
+        idList_right = new int[]{R.id.button7,R.id.button8,R.id.button9,R.id.button10,R.id.button11,R.id.button12};
 
     }
 
@@ -187,289 +198,155 @@ public class toJActivity extends AppCompatActivity {
         linearLayout_right.setBackgroundColor(Color.parseColor("#00000000"));
     }
 
-    public void button1(View v) {
+    public void button_left(View v){
 
         right_background_reset();
 
         //使用フィールド判定
         if(field == FIELD_RIGHT){
             reset_right();
-
             //使用フィールド変更の際に加える．
             translatedText += addText;
-
             field = FIELD_LEFT;
+
+            if(weight == 60) numMode = NUMMODE_ON;
+
+            System.out.println("(button_left)numMode1:"+numMode);
+
+            if(numMode == NUMMODE_ON){
+                numCount = translatedText.length() - temp_length;
+            }
+
+            System.out.println("(button_left)numCount1:" + numCount);
         }
+
+        //タグ付けした整数の取得
+        int index = Integer.parseInt(v.getTag().toString());
+
+        //System.out.println(index);
 
         //ボタン押下判定
-        if (flag1[0] == 0) {
-            this.findViewById(R.id.button1).setActivated(true);
-            flag1[0] = 1;
-        } else if (flag1[0] == 1) {
-            this.findViewById(R.id.button1).setActivated(false);
-            flag1[0] = 0;
+        if (flag1[index] == BUTTON_OFF) {
+            this.findViewById(idList_left[index]).setActivated(true);
+            flag1[index] = BUTTON_ON;
+        } else if (flag1[index] == BUTTON_ON) {
+            this.findViewById(idList_left[index]).setActivated(false);
+            flag1[index] = BUTTON_OFF;
         }
+//        switch (v.getId()){
+//            case R.id.button1:
+//                button1();
+//                break;
+//            case R.id.button2:
+//                button2();
+//                break;
+//            case R.id.button3:
+//                button3();
+//                break;
+//            case R.id.button4:
+//                button4();
+//                break;
+//            case R.id.button5:
+//                button5();
+//                break;
+//            case R.id.button6:
+//                button6();
+//                break;
+//        }
 
         //翻訳判定
-        judge();
-    }
 
-    public void button2(View v) {
+        System.out.println("(button_left)numMode2:"+numMode);
+        System.out.println("(button_left)numCount2:" + numCount);
 
-        right_background_reset();
-
-        if(field == FIELD_RIGHT){
-            reset_right();
-
-            translatedText += addText;
-
-            field = FIELD_LEFT;
-        }
-
-        if (flag1[1] == 0) {
-            this.findViewById(R.id.button2).setActivated(true);
-            flag1[1] = 1;
-        } else if (flag1[1] == 1) {
-            this.findViewById(R.id.button2).setActivated(false);
-            flag1[1] = 0;
-        }
-
-        judge();
-    }
-
-    public void button3(View v) {
-
-        right_background_reset();
-
-        if(field == FIELD_RIGHT){
-            reset_right();
-
-            translatedText += addText;
-
-            field = FIELD_LEFT;
-        }
-
-        if (flag1[2] == 0) {
-            this.findViewById(R.id.button3).setActivated(true);
-            flag1[2] = 1;
-        } else if (flag1[2] == 1) {
-            this.findViewById(R.id.button3).setActivated(false);
-            flag1[2] = 0;
-        }
-
-        judge();
-    }
-
-    public void button4(View v) {
-
-        right_background_reset();
-
-        if(field == FIELD_RIGHT){
-            reset_right();
-
-            translatedText += addText;
-
-            field = FIELD_LEFT;
-        }
-
-        if (flag1[3] == 0) {
-            this.findViewById(R.id.button4).setActivated(true);
-            flag1[3] = 1;
-        } else if (flag1[3] == 1) {
-            this.findViewById(R.id.button4).setActivated(false);
-            flag1[3] = 0;
-        }
-
-        judge();
-    }
-
-    public void button5(View v) {
-
-        right_background_reset();
-
-        if(field == FIELD_RIGHT){
-            reset_right();
-
-            translatedText += addText;
-
-            field = FIELD_LEFT;
-        }
-
-        if (flag1[4] == 0) {
-            this.findViewById(R.id.button5).setActivated(true);
-            flag1[4] = 1;
-        } else if (flag1[4] == 1) {
-            this.findViewById(R.id.button5).setActivated(false);
-            flag1[4] = 0;
-        }
-
-        judge();
-    }
-
-    public void button6(View v) {
-
-        right_background_reset();
-
-        if(field == FIELD_RIGHT){
-            reset_right();
-
-            translatedText += addText;
-
-            field = FIELD_LEFT;
-        }
-
-        if (flag1[5] == 0) {
-            this.findViewById(R.id.button6).setActivated(true);
-            flag1[5] = 1;
-        } else if (flag1[5] == 1) {
-            this.findViewById(R.id.button6).setActivated(false);
-            flag1[5] = 0;
-        }
-
-        judge();
-    }
-
-    public void button7(View v) {
-
-        left_background_reset();
-
-        if(field == FIELD_LEFT){
-            reset_left();
-
-            translatedText += addText;
-
-            field = FIELD_RIGHT;
-        }
-
-        if (flag2[0] == 0) {
-            this.findViewById(R.id.button7).setActivated(true);
-            flag2[0] = 1;
-        } else if (flag2[0] == 1) {
-            this.findViewById(R.id.button7).setActivated(false);
-            flag2[0] = 0;
-        }
-
-        judge();
-    }
-
-    public void button8(View v) {
-
-        left_background_reset();
-
-        if(field == FIELD_LEFT){
-            reset_left();
-
-            translatedText += addText;
-
-            field = FIELD_RIGHT;
-        }
-
-        if (flag2[1] == 0) {
-            this.findViewById(R.id.button8).setActivated(true);
-            flag2[1] = 1;
-        } else if (flag2[1] == 1) {
-            this.findViewById(R.id.button8).setActivated(false);
-            flag2[1] = 0;
-        }
-
-        judge();
-    }
-
-    public void button9(View v) {
-
-        left_background_reset();
-
-        if(field == FIELD_LEFT){
-            reset_left();
-
-            translatedText += addText;
-
-            field = FIELD_RIGHT;
-        }
-
-        if (flag2[2] == 0) {
-            this.findViewById(R.id.button9).setActivated(true);
-            flag2[2] = 1;
-        } else if (flag2[2] == 1) {
-            this.findViewById(R.id.button9).setActivated(false);
-            flag2[2] = 0;
-        }
-
-        judge();
-    }
-
-    public void button10(View v) {
-
-        left_background_reset();
-
-        if(field == FIELD_LEFT){
-            reset_left();
-
-            translatedText += addText;
-
-            field = FIELD_RIGHT;
-        }
-
-        if (flag2[3] == 0) {
-            this.findViewById(R.id.button10).setActivated(true);
-            flag2[3] = 1;
-        } else if (flag2[3] == 1) {
-            this.findViewById(R.id.button10).setActivated(false);
-            flag2[3] = 0;
-        }
-
-        judge();
-    }
-
-    public void button11(View v) {
-
-        left_background_reset();
-
-        if(field == FIELD_LEFT){
-            reset_left();
-
-            translatedText += addText;
-
-            field = FIELD_RIGHT;
-        }
-
-        if (flag2[4] == 0) {
-            this.findViewById(R.id.button11).setActivated(true);
-            flag2[4] = 1;
-        } else if (flag2[4] == 1) {
-            this.findViewById(R.id.button11).setActivated(false);
-            flag2[4] = 0;
-        }
-
-        judge();
-
-    }
-
-    public void button12(View v) {
-
-        left_background_reset();
-
-        if(field == FIELD_LEFT){
-            reset_left();
-            translatedText += addText;
-            field = FIELD_RIGHT;
-        }
-
-        if (flag2[5] == 0) {
-            this.findViewById(R.id.button12).setActivated(true);
-            flag2[5] = 1;
-        } else if (flag2[5] == 1) {
-            this.findViewById(R.id.button12).setActivated(false);
-            flag2[5] = 0;
-        }
-
-        if(numMode == NUMMODE_OFF){
+        if((numMode == NUMMODE_OFF)||(numCount == 4)||(numCount < 0)){
+            temp_length = -1;
+            numCount = 0;
+            numMode = NUMMODE_OFF;
             judge();
         }else if(numMode == NUMMODE_ON){
+            //TODO 4文字を数える処理，削除した際のエラー処理，消去時のモード変更
+            if(temp_length == -1){
+                temp_length = translatedText.length();
+            }
             judgeNum();
         }
 
     }
+
+    public void button_right(View v){
+
+        left_background_reset();
+
+        if(field == FIELD_LEFT){
+            reset_left();
+
+            translatedText += addText;
+            field = FIELD_RIGHT;
+
+            if(weight == 60) numMode = NUMMODE_ON;
+
+            System.out.println("(button_right)numMode1:"+numMode);
+
+            if(numMode == NUMMODE_ON){
+                numCount = translatedText.length() - temp_length;
+            }
+
+            System.out.println("(button_right)numCount1:" + numCount);
+        }
+
+        int index = Integer.parseInt(v.getTag().toString());
+
+        //System.out.println(index);
+
+        //ボタン押下判定
+        if (flag2[index] == BUTTON_OFF) {
+            this.findViewById(idList_right[index]).setActivated(true);
+            flag2[index] = BUTTON_ON;
+        } else if (flag2[index] == BUTTON_ON) {
+            this.findViewById(idList_right[index]).setActivated(false);
+            flag2[index] = BUTTON_OFF;
+        }
+
+//        switch (v.getId()){
+//            case R.id.button7:
+//                button7();
+//                break;
+//            case R.id.button8:
+//                button8();
+//                break;
+//            case R.id.button9:
+//                button9();
+//                break;
+//            case R.id.button10:
+//                button10();
+//                break;
+//            case R.id.button11:
+//                button11();
+//                break;
+//            case R.id.button12:
+//                button12();
+//                break;
+//        }
+        System.out.println("(button_right)numMode2:"+numMode);
+        System.out.println("(button_right)numCount2:" + numCount);
+
+        //翻訳判定
+        if((numMode == NUMMODE_OFF)||(numCount == 4)||(numCount < 0)){
+            temp_length = -1;
+            numCount = 0;
+            numMode = NUMMODE_OFF;
+            judge();
+        }else if(numMode == NUMMODE_ON){
+            //TODO 4文字を数える処理，削除した際のエラー処理、消去時のモード変更
+            if(temp_length == -1){
+                temp_length = translatedText.length();
+            }
+            judgeNum();
+        }
+
+    }
+
 
     public void weight_calc(){
 
@@ -500,11 +377,37 @@ public class toJActivity extends AppCompatActivity {
     public void judgeNum() {
         addText = "";
 
-        //数符 + 数符のエラー処理
+        //TODO 数符 + 数符のエラー処理 アラートダイアログとか出すべきかな〜
+        //点字がないときどうするか考えねば．
+        //空白検知しないといけないかもしれない．https://www.slideshare.net/EijiSato/ss-47944764
 
+        //重み計算
+        weight_calc();
+
+        System.out.println(field);
+
+        //使用フィールド変更のタイミングでカウントさせるか
+
+        for(int i = 0;i < weights2.length;i++){
+            System.out.println("weight2 = " + weight);
+            //System.out.println("brailles = " + brailles[i].getCode());
+
+            if(weight == brailles2[i].getWeight()){
+                addText = brailles2[i].getNumber();
+                System.out.println("brailles = " + brailles2[i].getNumber());
+                break;
+            }else{
+                addText="";
+            }
+        }
+
+        toJResult.setText(translatedText + addText);
+
+        if(weight==0){
+            both_background_reset();
+        }
 
     }
-
 
     public void judge(){ //翻訳判定
 
@@ -516,10 +419,12 @@ public class toJActivity extends AppCompatActivity {
         //数字モードかどうか判定
 
         if(weight == 60){
-            numMode = NUMMODE_ON;
-            inputNum.setVisibility(View.VISIBLE);
-            addText = "";
-            toJResult.setText(translatedText);
+            if(numMode != NUMMODE_ON){
+                //numMode = NUMMODE_ON;
+                inputNum.setVisibility(View.VISIBLE);
+                addText = "";
+                toJResult.setText(translatedText);
+            }
         }else{
             numMode = NUMMODE_OFF;
             inputNum.setVisibility(View.INVISIBLE);
@@ -527,7 +432,7 @@ public class toJActivity extends AppCompatActivity {
 
         if(numMode == NUMMODE_OFF){
             for(int i = 0;i < weights1.length;i++){
-                System.out.println("weight = " + weight);
+                System.out.println("weight1 = " + weight);
                 //System.out.println("brailles = " + brailles[i].getCode());
 
                 if(weight == brailles1[i].getWeight()){
@@ -538,10 +443,21 @@ public class toJActivity extends AppCompatActivity {
                     addText="";
                 }
             }
-            toJResult.setText(translatedText + addText);
+        }else if(numMode == NUMMODE_ON){
+            for(int i = 0;i < weights2.length;i++){
+                System.out.println("weight2 = " + weight);
+                //System.out.println("brailles = " + brailles[i].getCode());
+
+                if(weight == brailles2[i].getWeight()){
+                    addText = brailles2[i].getNumber();
+                    System.out.println("brailles = " + brailles2[i].getNumber());
+                    break;
+                }else{
+                    addText="";
+                }
+            }
         }
-
-
+        toJResult.setText(translatedText + addText);
 
         if(weight==0){
             both_background_reset();
@@ -594,6 +510,17 @@ public class toJActivity extends AppCompatActivity {
             }
         }
 
+        if(numMode == NUMMODE_ON){
+            numCount = translatedText.length() - temp_length;
+            if(numCount < 0){
+                numMode = NUMMODE_OFF;
+                temp_length = -1;
+                numCount = 0;
+                inputNum.setVisibility(View.INVISIBLE);
+            }
+        }
+
+
         toJResult.setText(translatedText);
 
         both_background_reset();
@@ -605,6 +532,11 @@ public class toJActivity extends AppCompatActivity {
 
         both_background_reset();
         both_flags_reset();
+
+        numMode = NUMMODE_OFF;
+        temp_length = -1;
+        numCount = 0;
+        inputNum.setVisibility(View.INVISIBLE);
 
         addText = "";
         translatedText = "";
@@ -634,6 +566,8 @@ public class toJActivity extends AppCompatActivity {
             Toast.makeText(this,"クリップボードにコピーしました.", Toast.LENGTH_LONG).show();
         }
     }
+
+
 }
 
 
