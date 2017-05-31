@@ -4,9 +4,8 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
 import android.graphics.Color;
-import android.lifeistech.com.braillewords.databinding.ActivityToJBinding;
+import android.media.Image;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,8 +23,6 @@ import android.widget.Toast;
 import java.util.Locale;
 
 public class toJActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
-
-    //private ActivityToJBinding binding;
 
     //使用フィールド変数
     public final static int FIELD_LEFT = 0;
@@ -182,8 +180,6 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             26,1,3,9,25,17,11,27,19,10,2,4
     };
 
-
-
     //id保持用配列
     int[] idList_left;
     int[] idList_right;
@@ -192,39 +188,27 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     private TextToSpeech mTextToSpeech;
 
-//    //ドラッグイベント発生
-//    private View.OnTouchListener onTouchListener = new View.OnTouchListener(){
-//        @Override
-//        public boolean onTouch(View v, MotionEvent event) {
-//            v.startDrag(null,new View.DragShadowBuilder(null),v,0);
-//            return false;
-//        }
-//    };
-//
-//    //ドラッグイベント管理
-//    private View.OnDragListener dragListener = new View.OnDragListener(){
-//        @Override
-//        public boolean onDrag(View v, DragEvent event) {
-//            switch (event.getAction()){
-//                case DragEvent.ACTION_DRAG_ENTERED:
-//                    Log.d("onDrag", v.getTag().toString() + "タグちゃん");
-//                    break;
-//                case DragEvent.ACTION_DRAG_ENDED:
-//                    for(int i = 0; i < flag1.length; i++) {
-//                        if(flag1[i] == 1) Log.d("打たれた場所", i + 1 + "番目");
-//                    }
-//            }
-//            return false;
-//        }
-//    };
+    ImageButton[] left_buttons;
+    ImageButton[] right_buttons;
 
+    //ボタンをコードで扱うために
+    ImageButton button1;
+    ImageButton button2;
+    ImageButton button3;
+    ImageButton button4;
+    ImageButton button5;
+    ImageButton button6;
+    ImageButton button7;
+    ImageButton button8;
+    ImageButton button9;
+    ImageButton button10;
+    ImageButton button11;
+    ImageButton button12;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_j);
-
-        //binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         toJResult=(TextView)findViewById(R.id.toJResult);
         linearLayout_left=(LinearLayout)findViewById(R.id.linearLayout1);
@@ -262,39 +246,105 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         voicedMode = false;
         semi_voicedMode = false;
 
+        //idList
         idList_left = new int[]{R.id.button1,R.id.button2,R.id.button3,R.id.button4,R.id.button5,R.id.button6};
         idList_right = new int[]{R.id.button7,R.id.button8,R.id.button9,R.id.button10,R.id.button11,R.id.button12};
+
+        left_buttons = new ImageButton[]{button1, button2, button3, button4, button5, button6};
+        right_buttons = new ImageButton[]{button7, button8, button9, button10, button11, button12};
+
+        //関連付け
+        for(int i = 0; i<6;i++){
+            left_buttons[i] = (ImageButton) findViewById(idList_left[i]);
+            right_buttons[i] = (ImageButton) findViewById(idList_right[i]);
+        }
 
         //flag1,2の初期化
         both_flags_reset();
         both_background_reset();
 
-        //setListener();
+        setListener();
     }
 
-//    private void setListener() {
-//        binding.button1.setOnTouchListener(onTouchListener);
-//        binding.button2.setOnTouchListener(onTouchListener);
-//        binding.button3.setOnTouchListener(onTouchListener);
-//        binding.button4.setOnTouchListener(onTouchListener);
-//        binding.button5.setOnTouchListener(onTouchListener);
-//        binding.button6.setOnTouchListener(onTouchListener);
-//
-//        binding.button1.setOnDragListener(dragListener);
-//        binding.button2.setOnDragListener(dragListener);
-//        binding.button3.setOnDragListener(dragListener);
-//        binding.button4.setOnDragListener(dragListener);
-//        binding.button5.setOnDragListener(dragListener);
-//        binding.button6.setOnDragListener(dragListener);
-//    }
+    //ドラッグイベント発生
+    private View.OnTouchListener onTouchListener = new View.OnTouchListener(){
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            v.startDrag(null,new View.DragShadowBuilder(null),v,0);
+            return false;
+        }
+    };
+
+    //ドラッグイベント管理
+    private View.OnDragListener dragListener = new View.OnDragListener(){
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+            //TODO 左フィールドのボタンだったら button_left(v)，右フィールドのボタンだったら button_right(v)
+
+            switch (event.getAction()){
+                case DragEvent.ACTION_DRAG_ENTERED:
+                    Log.d("onDrag", v.getTag().toString() + "タグちゃん");
+                    //左か右か判定メソッド
+                    if(judgeField(v) == FIELD_LEFT){
+                        button_left(v);
+                    }else if(judgeField(v) == FIELD_RIGHT){
+                        button_right(v);
+                    }
+                    //button1.setActivated(true);
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    for(int i = 0; i < flag1.length; i++) {
+                        if(flag1[i] == 1) Log.d("打たれた場所", i + 1 + "番目");
+                    }
+                    break;
+            }
+            return true;
+        }
+    };
+
+    public int judgeField(View v) {
+
+        switch(v.getId()){
+            case R.id.button1:
+            case R.id.button2:
+            case R.id.button3:
+            case R.id.button4:
+            case R.id.button5:
+            case R.id.button6: return FIELD_LEFT;
+
+            case R.id.button7:
+            case R.id.button8:
+            case R.id.button9:
+            case R.id.button10:
+            case R.id.button11:
+            case R.id.button12: return FIELD_RIGHT;
+
+        }
+
+        return 0; //エラー処理(-1)とかにして，exceptionに飛ばす．
+    }
+
+    private void setListener() {
+
+        for(int i = 0;i<6;i++){
+            left_buttons[i].setOnTouchListener(onTouchListener);
+            left_buttons[i].setOnDragListener(dragListener);
+
+            right_buttons[i].setOnTouchListener(onTouchListener);
+            right_buttons[i].setOnDragListener(dragListener);
+        }
+
+    }
 
     public void both_flags_reset() {
         for (int i = 0; i < 6; i++) {
             flag1[i] = 0;
-            this.findViewById(idList_left[i]).setActivated(false);
+            //this.findViewById(idList_left[i]).setActivated(false);
+            left_buttons[i].setActivated(false);
 
             flag2[i] = 0;
-            this.findViewById(idList_right[i]).setActivated(false);
+            //this.findViewById(idList_right[i]).setActivated(false);
+            right_buttons[i].setActivated(false);
         }
     }
 
@@ -303,6 +353,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         linearLayout_right.setBackgroundColor(Color.parseColor("#00000000"));
     }
 
+    //結局しようせず．笑
     public void both_background_input(){
         linearLayout_left.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
         linearLayout_right.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
@@ -319,6 +370,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     }
 
 
+    //もともとbutton_left(View v)メソッドだったが，onTouchListener導入で使用場所変更．
     public void button_left(View v){
 
         //濁点，半濁点モード解除のタイミング：移動してもONだったらOFFにする．
@@ -336,6 +388,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             voicedMode = VOICEDMODE_OFF;
             semi_voicedMode = SEMIVOICEDMODE_OFF;
 
+
+            //switch文で綺麗にできる．
             if(weight == 16) {
                 voicedMode = VOICEDMODE_ON;
             }
