@@ -4,10 +4,6 @@ android {
     compileSdkVersion 23
     buildToolsVersion '25.0.0'
 
-    dataBinding {
-        enabled = true
-    }
-
     defaultConfig {
         applicationId "android.lifeistech.com.braillewords"
         minSdkVersion 15
