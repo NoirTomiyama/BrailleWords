@@ -3,9 +3,16 @@ package android.lifeistech.com.braillewords;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.graphics.Color;
+import android.lifeistech.com.braillewords.databinding.ActivityToJBinding;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -13,9 +20,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class toJActivity extends AppCompatActivity {
+import java.util.Locale;
 
-   //使用フィールド変数
+public class toJActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+
+    //private ActivityToJBinding binding;
+
+    //使用フィールド変数
     public final static int FIELD_LEFT = 0;
     public final static int FIELD_RIGHT = 1;
 
@@ -23,15 +34,19 @@ public class toJActivity extends AppCompatActivity {
     public final static boolean NUMMODE_ON = true;
     public final static boolean NUMMODE_OFF = false;
 
+    //濁点，半濁点入力モード
+    public final static boolean VOICEDMODE_ON = true;
+    public final static boolean VOICEDMODE_OFF = false;
+
+    public final static boolean SEMIVOICEDMODE_ON = true;
+    public final static boolean SEMIVOICEDMODE_OFF = false;
+
     //ボタン押されたかどうか
     public final static int BUTTON_ON = 1;
     public final static int BUTTON_OFF = 0;
 
-    //翻訳結果(今までの保持する)
-    TextView toJResult;
-
-    //数字入力中テキスト
-    TextView inputNum;
+    TextView toJResult;     //翻訳結果(今までの保持する)
+    TextView inputNum;      //数字入力中テキスト
 
     //押下判定
     int[] flag1 = new int[6];
@@ -39,21 +54,20 @@ public class toJActivity extends AppCompatActivity {
 
     //現在の翻訳テキスト
     String translatedText = "";
-
     //追加テキスト
     String addText = "";
-
     //コピー時に使用
-    String copy = "";   //String型の初期化
+    String copy = "";
 
     //重み格納変数
     int weight = 0;
-
     //使用フィールド
     int field = 0;
 
-    //数字入力モード判定
+    //入力モード判定
     boolean numMode;
+    boolean voicedMode;
+    boolean semi_voicedMode;
 
     //数字入力制限(4まで)
     int temp_length = -1;
@@ -66,21 +80,9 @@ public class toJActivity extends AppCompatActivity {
     public static Braille[] brailles1;
     //数字系がおもに入る．
     public static Braille[] brailles2;
-
-//    private String[] codes = {
-//            "100000","101000","110000","111000","011000",   //あ行
-//            "100001","101001","110001","111001","011001",   //か行
-//            "100101","101101","110101","111101","011101",   //さ行
-//            "100110","101110","110110","111110","011110",   //た行
-//            "100010","101010","110010","111010","011010",   //な行
-//            "100011","101011","110011","111011","011011",   //は行
-//            "100111","101111","110111","111111","011111",   //ま行
-//            "010010","010011","010110",                     //や行
-//            "100100","101100","110100","111100","011100",   //ら行
-//            "000010","001010","001110","000110",            //わ行
-//            "000111","001000","001100",                     //ん行
-//            "001101","000101","000100","001001","001110"    //。、・？！
-//    };
+    //濁音，半濁音が入る
+    public static Braille[] brailles3;
+    public static Braille[] brailles4;
 
     private int[] weights1 = {
             1,3,9,11,10,        //あ行
@@ -92,14 +94,12 @@ public class toJActivity extends AppCompatActivity {
             53,55,61,63,62,     //ま行
             12,44,28,           //や行
             17,19,25,27,26,     //ら行
-            4,6,64,20,          //わ行("ゑ"のみ別対処を考える．)
+            4,6,100,20,          //わ行("ゑ"のみ別対処を考える．)
             52,2,18,            //ん行
-            50,48,16,34,22      //。、・？！
+            50,48,100,34,22      //。、・？！(・について考える．)
     };
 
-    //weight = 60のとき，数字入力モード
-
-    private String[] japaneses = {
+    private String[] japaneses1 = {
             "あ","い","う","え","お",
             "か","き","く","け","こ",
             "さ","し","す","せ","そ",
@@ -114,6 +114,66 @@ public class toJActivity extends AppCompatActivity {
             "。","、","・","？","！"
     };
 
+    private int[] weights3 = {
+//            1,3,9,11,10,        //あ行
+            33,35,41,43,42,     //か行
+            49,51,57,59,58,     //さ行
+            21,23,29,31,30,     //た行
+//            5,7,13,15,14,       //な行
+            37,39,45,47,46     //は行
+//            53,55,61,63,62,     //ま行
+//            12,44,28,           //や行
+//            17,19,25,27,26,     //ら行
+//            4,6,64,20,          //わ行("ゑ"のみ別対処を考える．)
+//            52,2,18,            //ん行
+//            50,48,16,34,22      //。、・？！
+    };
+
+    private String[] japaneses3 = {
+//            "あ","い","う","え","お",
+            "が","ぎ","ぐ","げ","ご",
+            "ざ","じ","ず","ぜ","ぞ",
+            "だ","ぢ","づ","で","ど",
+//            "な","に","ぬ","ね","の",
+            "ば","び","ぶ","べ","ぼ"
+//            "ま","み","む","め","も",
+//            "や","ゆ","よ",
+//            "ら","り","る","れ","ろ",
+//            "わ","ゐ","ゑ","を",
+//            "ん","っ","ー",
+//            "。","、","・","？","！"
+    };
+
+    private int[] weights4 = {
+//            1,3,9,11,10,        //あ行
+//            33,35,41,43,42,     //か行
+//            49,51,57,59,58,     //さ行
+//            21,23,29,31,30,     //た行
+//            5,7,13,15,14,       //な行
+            37,39,45,47,46     //は行
+//            53,55,61,63,62,     //ま行
+//            12,44,28,           //や行
+//            17,19,25,27,26,     //ら行
+//            4,6,64,20,          //わ行("ゑ"のみ別対処を考える．)
+//            52,2,18,            //ん行
+//            50,48,16,34,22      //。、・？！
+    };
+
+    private String[] japaneses4 = {
+//            "あ","い","う","え","お",
+//            "が","ぎ","ぐ","げ","ご",
+//            "ざ","じ","ず","ぜ","ぞ",
+//            "だ","ぢ","づ","で","ど",
+//            "な","に","ぬ","ね","の",
+            "ぱ","ぴ","ぷ","ぺ","ぽ"
+//            "ま","み","む","め","も",
+//            "や","ゆ","よ",
+//            "ら","り","る","れ","ろ",
+//            "わ","ゐ","ゑ","を",
+//            "ん","っ","ー",
+//            "。","、","・","？","！"
+    };
+
     private String [] numbers = {
             "0","1","2","3","4","5","6","7","8","9",".",","
     };
@@ -122,9 +182,41 @@ public class toJActivity extends AppCompatActivity {
             26,1,3,9,25,17,11,27,19,10,2,4
     };
 
+
+
     //id保持用配列
     int[] idList_left;
     int[] idList_right;
+
+    private static int MY_DATA_CHECK_CODE = 1;
+
+    private TextToSpeech mTextToSpeech;
+
+//    //ドラッグイベント発生
+//    private View.OnTouchListener onTouchListener = new View.OnTouchListener(){
+//        @Override
+//        public boolean onTouch(View v, MotionEvent event) {
+//            v.startDrag(null,new View.DragShadowBuilder(null),v,0);
+//            return false;
+//        }
+//    };
+//
+//    //ドラッグイベント管理
+//    private View.OnDragListener dragListener = new View.OnDragListener(){
+//        @Override
+//        public boolean onDrag(View v, DragEvent event) {
+//            switch (event.getAction()){
+//                case DragEvent.ACTION_DRAG_ENTERED:
+//                    Log.d("onDrag", v.getTag().toString() + "タグちゃん");
+//                    break;
+//                case DragEvent.ACTION_DRAG_ENDED:
+//                    for(int i = 0; i < flag1.length; i++) {
+//                        if(flag1[i] == 1) Log.d("打たれた場所", i + 1 + "番目");
+//                    }
+//            }
+//            return false;
+//        }
+//    };
 
 
     @Override
@@ -132,18 +224,16 @@ public class toJActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_j);
 
+        //binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
         toJResult=(TextView)findViewById(R.id.toJResult);
         linearLayout_left=(LinearLayout)findViewById(R.id.linearLayout1);
         linearLayout_right=(LinearLayout)findViewById(R.id.linearLayout2);
 
-        //flag1,2の初期化
-        both_flags_reset();
-        both_background_reset();
-
         //braillesの初期化
         brailles1 = new Braille[64];
         for(int i = 0;i<weights1.length;i++){
-            Braille braille1 = new Braille(japaneses[i],weights1[i]);
+            Braille braille1 = new Braille(japaneses1[i],weights1[i]);
             brailles1[i] = braille1;
         }
 
@@ -153,39 +243,69 @@ public class toJActivity extends AppCompatActivity {
             brailles2[i] = braille2;
         }
 
+        brailles3 = new Braille[64];
+        for(int i = 0;i<weights3.length;i++){
+            Braille braille3 = new Braille(japaneses3[i],weights3[i]);
+            brailles3[i] = braille3;
+        }
+
+        brailles4 = new Braille[64];
+        for(int i = 0;i<weights4.length;i++){
+            Braille braille4 = new Braille(japaneses4[i],weights4[i]);
+            brailles4[i] = braille4;
+        }
+
         numMode = false;
         inputNum = (TextView)findViewById(R.id.inputNum);
         inputNum.setVisibility(View.INVISIBLE);
 
+        voicedMode = false;
+        semi_voicedMode = false;
+
         idList_left = new int[]{R.id.button1,R.id.button2,R.id.button3,R.id.button4,R.id.button5,R.id.button6};
         idList_right = new int[]{R.id.button7,R.id.button8,R.id.button9,R.id.button10,R.id.button11,R.id.button12};
 
+        //flag1,2の初期化
+        both_flags_reset();
+        both_background_reset();
+
+        //setListener();
     }
+
+//    private void setListener() {
+//        binding.button1.setOnTouchListener(onTouchListener);
+//        binding.button2.setOnTouchListener(onTouchListener);
+//        binding.button3.setOnTouchListener(onTouchListener);
+//        binding.button4.setOnTouchListener(onTouchListener);
+//        binding.button5.setOnTouchListener(onTouchListener);
+//        binding.button6.setOnTouchListener(onTouchListener);
+//
+//        binding.button1.setOnDragListener(dragListener);
+//        binding.button2.setOnDragListener(dragListener);
+//        binding.button3.setOnDragListener(dragListener);
+//        binding.button4.setOnDragListener(dragListener);
+//        binding.button5.setOnDragListener(dragListener);
+//        binding.button6.setOnDragListener(dragListener);
+//    }
 
     public void both_flags_reset() {
         for (int i = 0; i < 6; i++) {
             flag1[i] = 0;
+            this.findViewById(idList_left[i]).setActivated(false);
+
             flag2[i] = 0;
+            this.findViewById(idList_right[i]).setActivated(false);
         }
-
-        this.findViewById(R.id.button1).setActivated(false);
-        this.findViewById(R.id.button2).setActivated(false);
-        this.findViewById(R.id.button3).setActivated(false);
-        this.findViewById(R.id.button4).setActivated(false);
-        this.findViewById(R.id.button5).setActivated(false);
-        this.findViewById(R.id.button6).setActivated(false);
-        this.findViewById(R.id.button7).setActivated(false);
-        this.findViewById(R.id.button8).setActivated(false);
-        this.findViewById(R.id.button9).setActivated(false);
-        this.findViewById(R.id.button10).setActivated(false);
-        this.findViewById(R.id.button11).setActivated(false);
-        this.findViewById(R.id.button12).setActivated(false);
-
     }
 
     public void both_background_reset(){
         linearLayout_left.setBackgroundColor(Color.parseColor("#00000000"));
         linearLayout_right.setBackgroundColor(Color.parseColor("#00000000"));
+    }
+
+    public void both_background_input(){
+        linearLayout_left.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
+        linearLayout_right.setBackgroundColor(Color.parseColor("#BFE0FFFF"));
     }
 
     public void left_background_reset(){
@@ -198,7 +318,10 @@ public class toJActivity extends AppCompatActivity {
         linearLayout_right.setBackgroundColor(Color.parseColor("#00000000"));
     }
 
+
     public void button_left(View v){
+
+        //濁点，半濁点モード解除のタイミング：移動してもONだったらOFFにする．
 
         right_background_reset();
 
@@ -209,23 +332,32 @@ public class toJActivity extends AppCompatActivity {
             translatedText += addText;
             field = FIELD_LEFT;
 
-            if(weight == 60) numMode = NUMMODE_ON;
+            //移動してもONだったらOFFに
+            voicedMode = VOICEDMODE_OFF;
+            semi_voicedMode = SEMIVOICEDMODE_OFF;
 
-            System.out.println("(button_left)numMode1:"+numMode);
-
-            if(numMode == NUMMODE_ON){
-                numCount = translatedText.length() - temp_length;
+            if(weight == 16) {
+                voicedMode = VOICEDMODE_ON;
             }
+            System.out.println("(button_left)voicedMode:" + voicedMode);
 
+            if(weight == 32){
+                semi_voicedMode = SEMIVOICEDMODE_ON;
+            }
+            System.out.println("(button_left)semi_voicedMode:" + semi_voicedMode);
+
+            if(weight == 60) numMode = NUMMODE_ON;
+            System.out.println("(button_left)numMode1:" + numMode);
+
+            if(numMode == NUMMODE_ON) numCount = translatedText.length() - temp_length;
             System.out.println("(button_left)numCount1:" + numCount);
-        }
 
+        }
         //タグ付けした整数の取得
         int index = Integer.parseInt(v.getTag().toString());
-
         //System.out.println(index);
 
-        //ボタン押下判定
+        //ボタン押下判定(メソッド化したい．)
         if (flag1[index] == BUTTON_OFF) {
             this.findViewById(idList_left[index]).setActivated(true);
             flag1[index] = BUTTON_ON;
@@ -233,32 +365,12 @@ public class toJActivity extends AppCompatActivity {
             this.findViewById(idList_left[index]).setActivated(false);
             flag1[index] = BUTTON_OFF;
         }
-//        switch (v.getId()){
-//            case R.id.button1:
-//                button1();
-//                break;
-//            case R.id.button2:
-//                button2();
-//                break;
-//            case R.id.button3:
-//                button3();
-//                break;
-//            case R.id.button4:
-//                button4();
-//                break;
-//            case R.id.button5:
-//                button5();
-//                break;
-//            case R.id.button6:
-//                button6();
-//                break;
-//        }
 
         //翻訳判定
-
         System.out.println("(button_left)numMode2:"+numMode);
         System.out.println("(button_left)numCount2:" + numCount);
 
+        //numModeがOFF，numCountが4以上なら，numCountが0以下の場合(メソッド化すべき)
         if((numMode == NUMMODE_OFF)||(numCount >= 4)||(numCount < 0)){
             temp_length = -1;
             numCount = 0;
@@ -287,22 +399,31 @@ public class toJActivity extends AppCompatActivity {
             translatedText += addText;
             field = FIELD_RIGHT;
 
-            if(weight == 60) numMode = NUMMODE_ON;
+            //移動してもONだったらOFFに
+            voicedMode = VOICEDMODE_OFF;
+            semi_voicedMode = SEMIVOICEDMODE_OFF;
 
+            if(weight == 16) {
+                voicedMode = VOICEDMODE_ON;
+            }
+            System.out.println("(button_right)voicedMode:" + voicedMode);
+
+            if(weight == 32){
+                semi_voicedMode = SEMIVOICEDMODE_ON;
+            }
+            System.out.println("(button_right)semi_voicedMode:" + semi_voicedMode);
+
+            if(weight == 60) numMode = NUMMODE_ON;
             System.out.println("(button_right)numMode1:"+numMode);
 
-            if(numMode == NUMMODE_ON){
-                numCount = translatedText.length() - temp_length;
-            }
-
+            if(numMode == NUMMODE_ON) numCount = translatedText.length() - temp_length;
             System.out.println("(button_right)numCount1:" + numCount);
         }
 
         int index = Integer.parseInt(v.getTag().toString());
-
         //System.out.println(index);
 
-        //ボタン押下判定
+        //ボタン押下判定(メソッド化しよう．)
         if (flag2[index] == BUTTON_OFF) {
             this.findViewById(idList_right[index]).setActivated(true);
             flag2[index] = BUTTON_ON;
@@ -310,7 +431,6 @@ public class toJActivity extends AppCompatActivity {
             this.findViewById(idList_right[index]).setActivated(false);
             flag2[index] = BUTTON_OFF;
         }
-
 //        switch (v.getId()){
 //            case R.id.button7:
 //                button7();
@@ -331,10 +451,10 @@ public class toJActivity extends AppCompatActivity {
 //                button12();
 //                break;
 //        }
-        System.out.println("(button_right)numMode2:"+numMode);
+        System.out.println("(button_right)numMode2:" + numMode);
         System.out.println("(button_right)numCount2:" + numCount);
 
-        //翻訳判定
+        //翻訳判定(メソッド化する)
         if((numMode == NUMMODE_OFF)||(numCount == 4)||(numCount < 0)){
             temp_length = -1;
             numCount = 0;
@@ -350,9 +470,8 @@ public class toJActivity extends AppCompatActivity {
 
     }
 
-
+    //重み計算メソッド
     public void weight_calc(){
-
         weight = 0;
 
         //重み計算
@@ -377,6 +496,8 @@ public class toJActivity extends AppCompatActivity {
 
     }
 
+
+    //数値判定メソッド
     public void judgeNum() {
         addText = "";
 
@@ -391,6 +512,7 @@ public class toJActivity extends AppCompatActivity {
 
         //使用フィールド変更のタイミングでカウントさせるか
 
+        //ここはメソッド化できる．
         for(int i = 0;i < weights2.length;i++){
             System.out.println("weight2 = " + weight);
             //System.out.println("brailles = " + brailles[i].getCode());
@@ -400,6 +522,7 @@ public class toJActivity extends AppCompatActivity {
                 System.out.println("brailles = " + brailles2[i].getNumber());
                 break;
             }else{
+                //一致しなかった場合，ひらがなを表示しなければならない．その際，数字モードが溶ける(表示のみ，モード変換はaddText格納時)
                 addText="";
             }
         }
@@ -433,33 +556,62 @@ public class toJActivity extends AppCompatActivity {
             inputNum.setVisibility(View.INVISIBLE);
         }
 
-        if(numMode == NUMMODE_OFF){
-            for(int i = 0;i < weights1.length;i++){
-                System.out.println("weight1 = " + weight);
+        if(voicedMode == VOICEDMODE_OFF && semi_voicedMode == VOICEDMODE_OFF){
+            if(numMode == NUMMODE_OFF){
+                for(int i = 0;i < weights1.length;i++){
+                    System.out.println("weight1 = " + weight);
+                    //System.out.println("brailles = " + brailles[i].getCode());
+
+                    if(weight == brailles1[i].getWeight()){
+                        addText = brailles1[i].getS_japanese();
+                        System.out.println("brailles = " + brailles1[i].getS_japanese());
+                        break;
+                    }else{
+                        addText="";
+                    }
+                }
+            }else if(numMode == NUMMODE_ON){
+                for(int i = 0;i < weights2.length;i++){
+                    System.out.println("weight2 = " + weight);
+                    //System.out.println("brailles = " + brailles[i].getCode());
+
+                    if(weight == brailles2[i].getWeight()){
+                        addText = brailles2[i].getNumber();
+                        System.out.println("brailles = " + brailles2[i].getNumber());
+                        break;
+                    }else{
+                        addText="";
+                    }
+                }
+            }
+        }else if(voicedMode == VOICEDMODE_ON){
+            for(int i = 0;i < weights3.length;i++){
+                System.out.println("weight3 = " + weight);
                 //System.out.println("brailles = " + brailles[i].getCode());
 
-                if(weight == brailles1[i].getWeight()){
-                    addText = brailles1[i].getS_japanese();
-                    System.out.println("brailles = " + brailles1[i].getS_japanese());
+                if(weight == brailles3[i].getWeight()){
+                    addText = brailles3[i].getS_japanese();
+                    System.out.println("brailles = " + brailles3[i].getS_japanese());
                     break;
                 }else{
                     addText="";
                 }
             }
-        }else if(numMode == NUMMODE_ON){
-            for(int i = 0;i < weights2.length;i++){
-                System.out.println("weight2 = " + weight);
+        }else if(semi_voicedMode == SEMIVOICEDMODE_ON){
+            for(int i = 0;i < weights4.length;i++){
+                System.out.println("weight4 = " + weight);
                 //System.out.println("brailles = " + brailles[i].getCode());
 
-                if(weight == brailles2[i].getWeight()){
-                    addText = brailles2[i].getNumber();
-                    System.out.println("brailles = " + brailles2[i].getNumber());
+                if(weight == brailles4[i].getWeight()){
+                    addText = brailles4[i].getS_japanese();
+                    System.out.println("brailles = " + brailles4[i].getS_japanese());
                     break;
                 }else{
                     addText="";
                 }
             }
         }
+
         toJResult.setText(translatedText + addText);
 
         if(weight==0){
@@ -468,40 +620,28 @@ public class toJActivity extends AppCompatActivity {
 
     }
 
-    public void reset_left(){ //Table1削除用
+    //左テーブル削除
+    public void reset_left(){
 
-        for(int j=0;j<6;j++){
-            flag1[j]=0;
+        for(int i=0;i<6;i++){
+            flag1[i]=0;
+            this.findViewById(idList_left[i]).setActivated(false);
         }
 
-        this.findViewById(R.id.button1).setActivated(false);
-        this.findViewById(R.id.button2).setActivated(false);
-        this.findViewById(R.id.button3).setActivated(false);
-        this.findViewById(R.id.button4).setActivated(false);
-        this.findViewById(R.id.button5).setActivated(false);
-        this.findViewById(R.id.button6).setActivated(false);
-
-//        //移った段階で，total変数をプラス．
-//        total++;
     }
 
-    public void reset_right(){ //Table2削除用
+    //右テーブル削除
+    public void reset_right(){
 
-        for(int j=0;j<6;j++){
-            flag2[j]=0;
+        for(int i=0;i<6;i++){
+            flag2[i]=0;
+            this.findViewById(idList_right[i]).setActivated(false);
         }
-        this.findViewById(R.id.button7).setActivated(false);
-        this.findViewById(R.id.button8).setActivated(false);
-        this.findViewById(R.id.button9).setActivated(false);
-        this.findViewById(R.id.button10).setActivated(false);
-        this.findViewById(R.id.button11).setActivated(false);
-        this.findViewById(R.id.button12).setActivated(false);
 
-//        //移った段階で，total変数をプラス．
-//        total++;
     }
 
-    public void del1(View v){ //一文字削除
+    //一文字削除
+    public void del1(View v){
 
         if(translatedText.length() > 0) {
             if(addText.isEmpty()){
@@ -531,6 +671,7 @@ public class toJActivity extends AppCompatActivity {
 
     }
 
+    //全削除
     public void delAll(View v){
 
         both_background_reset();
@@ -549,7 +690,8 @@ public class toJActivity extends AppCompatActivity {
 
     public void copy(View v){
 
-        copy = translatedText + addText; //今
+        //現在のテキストの取得
+        copy = translatedText + addText; 
 
         if(!copy.isEmpty()){
             //クリップボードに格納するItemを作成
@@ -568,6 +710,77 @@ public class toJActivity extends AppCompatActivity {
 
             Toast.makeText(this,"クリップボードにコピーしました.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // TextToSpeech を解放する
+        if (mTextToSpeech != null) {
+            mTextToSpeech.shutdown();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // テキスト読み上げ可能チェックから戻った場合
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // 音声リソースが見つかったので TextToSpeech を開始する (-> onInit)
+                mTextToSpeech = new TextToSpeech(this, this);
+            } else {
+                // 音声リソースがなければダウンロードする
+                Intent installIntent = new Intent();
+                installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installIntent);
+            }
+        }
+    }
+
+    public void speak(View v) {
+        if (mTextToSpeech == null) {
+            // 初回はテキスト読み上げ可能かチェックする
+            Intent checkIntent = new Intent();
+            checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        } else {
+            // テキストを読み上げる
+            speech();
+        }
+    }
+
+    /**
+     * TextToSpeech のエンジンが初期化されたときに呼ばれます。
+     */
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            // 日本語に対応していれば日本語に設定する （無くても良い）
+            Locale locale = Locale.JAPANESE;
+            if (mTextToSpeech.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
+                mTextToSpeech.setLanguage(locale);
+            } else {
+                Toast.makeText(this, "It does not support the Japanese.", Toast.LENGTH_SHORT).show();
+            }
+            // テキストを読み上げる
+            speech();
+        } else {
+            Toast.makeText(this, "TextToSpeech is not supported.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * 入力されたメッセージを読み上げます。
+     */
+    private void speech() {
+        // テキスト読み上げ中であれば停止する
+        if (mTextToSpeech.isSpeaking()) {
+            mTextToSpeech.stop();
+        }
+        // テキストを読み上げる
+        String message = translatedText + addText;
+
+        mTextToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
     }
 
 
