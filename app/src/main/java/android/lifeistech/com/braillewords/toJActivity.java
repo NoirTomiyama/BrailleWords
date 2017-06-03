@@ -43,6 +43,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     TextView toJResult;     //翻訳結果(今までの保持する)
     TextView inputNum;      //数字入力中テキスト
 
+
+
     //押下判定
     int[] flag1 = new int[6];
     int[] flag2 = new int[6];
