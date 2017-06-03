@@ -27,15 +27,12 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     //使用フィールド変数
     public final static int FIELD_LEFT = 0;
     public final static int FIELD_RIGHT = 1;
-
     //数字入力モード
     public final static boolean NUMMODE_ON = true;
     public final static boolean NUMMODE_OFF = false;
-
     //濁点，半濁点入力モード
     public final static boolean VOICEDMODE_ON = true;
     public final static boolean VOICEDMODE_OFF = false;
-
     public final static boolean SEMIVOICEDMODE_ON = true;
     public final static boolean SEMIVOICEDMODE_OFF = false;
 
@@ -191,19 +188,15 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     ImageButton[] left_buttons;
     ImageButton[] right_buttons;
 
-    //ボタンをコードで扱うために
-    ImageButton button1;
-    ImageButton button2;
-    ImageButton button3;
-    ImageButton button4;
-    ImageButton button5;
-    ImageButton button6;
-    ImageButton button7;
-    ImageButton button8;
-    ImageButton button9;
-    ImageButton button10;
-    ImageButton button11;
-    ImageButton button12;
+    //ボタンをコードで扱うために導入
+    //左ボタン
+    ImageButton button1;    ImageButton button2;
+    ImageButton button3;    ImageButton button4;
+    ImageButton button5;    ImageButton button6;
+    //右ボタン
+    ImageButton button7;    ImageButton button8;
+    ImageButton button9;    ImageButton button10;
+    ImageButton button11;   ImageButton button12;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,19 +213,16 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             Braille braille1 = new Braille(japaneses1[i],weights1[i]);
             brailles1[i] = braille1;
         }
-
         brailles2 = new Braille[64];
         for(int i = 0;i<weights2.length;i++){
             Braille braille2 = new Braille(weights2[i],numbers[i]);
             brailles2[i] = braille2;
         }
-
         brailles3 = new Braille[64];
         for(int i = 0;i<weights3.length;i++){
             Braille braille3 = new Braille(japaneses3[i],weights3[i]);
             brailles3[i] = braille3;
         }
-
         brailles4 = new Braille[64];
         for(int i = 0;i<weights4.length;i++){
             Braille braille4 = new Braille(japaneses4[i],weights4[i]);
@@ -279,7 +269,6 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     private View.OnDragListener dragListener = new View.OnDragListener(){
         @Override
         public boolean onDrag(View v, DragEvent event) {
-            //TODO 左フィールドのボタンだったら button_left(v)，右フィールドのボタンだったら button_right(v)
 
             switch (event.getAction()){
                 case DragEvent.ACTION_DRAG_ENTERED:
@@ -290,6 +279,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                     }else if(judgeField(v) == FIELD_RIGHT){
                         button_right(v);
                     }
+                    //TODO 右でも左でもなかったときのエラー処理．
                     //button1.setActivated(true);
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:
@@ -304,24 +294,29 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     public int judgeField(View v) {
 
+        int judge_field = -1;
+
         switch(v.getId()){
             case R.id.button1:
             case R.id.button2:
             case R.id.button3:
             case R.id.button4:
             case R.id.button5:
-            case R.id.button6: return FIELD_LEFT;
+            case R.id.button6:
+                judge_field = FIELD_LEFT;
+                break;
 
             case R.id.button7:
             case R.id.button8:
             case R.id.button9:
             case R.id.button10:
             case R.id.button11:
-            case R.id.button12: return FIELD_RIGHT;
-
+            case R.id.button12:
+                judge_field = FIELD_RIGHT;
+                break;
         }
 
-        return 0; //エラー処理(-1)とかにして，exceptionに飛ばす．
+        return judge_field;
     }
 
     private void setListener() {
@@ -333,7 +328,6 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             right_buttons[i].setOnTouchListener(onTouchListener);
             right_buttons[i].setOnDragListener(dragListener);
         }
-
     }
 
     public void both_flags_reset() {
@@ -370,11 +364,10 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     }
 
 
-    //もともとbutton_left(View v)メソッドだったが，onTouchListener導入で使用場所変更．
+    //もともとonClickに紐付いていたが，onTouchListener導入で使用場所変更．
     public void button_left(View v){
 
         //濁点，半濁点モード解除のタイミング：移動してもONだったらOFFにする．
-
         right_background_reset();
 
         //使用フィールド判定
@@ -390,14 +383,10 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
 
             //switch文で綺麗にできる．
-            if(weight == 16) {
-                voicedMode = VOICEDMODE_ON;
-            }
+            if(weight == 16) voicedMode = VOICEDMODE_ON;
             System.out.println("(button_left)voicedMode:" + voicedMode);
 
-            if(weight == 32){
-                semi_voicedMode = SEMIVOICEDMODE_ON;
-            }
+            if(weight == 32) semi_voicedMode = SEMIVOICEDMODE_ON;
             System.out.println("(button_left)semi_voicedMode:" + semi_voicedMode);
 
             if(weight == 60) numMode = NUMMODE_ON;
@@ -457,14 +446,10 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             voicedMode = VOICEDMODE_OFF;
             semi_voicedMode = SEMIVOICEDMODE_OFF;
 
-            if(weight == 16) {
-                voicedMode = VOICEDMODE_ON;
-            }
+            if(weight == 16) voicedMode = VOICEDMODE_ON;
             System.out.println("(button_right)voicedMode:" + voicedMode);
 
-            if(weight == 32){
-                semi_voicedMode = SEMIVOICEDMODE_ON;
-            }
+            if(weight == 32) semi_voicedMode = SEMIVOICEDMODE_ON;
             System.out.println("(button_right)semi_voicedMode:" + semi_voicedMode);
 
             if(weight == 60) numMode = NUMMODE_ON;
@@ -472,6 +457,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
             if(numMode == NUMMODE_ON) numCount = translatedText.length() - temp_length;
             System.out.println("(button_right)numCount1:" + numCount);
+
         }
 
         int index = Integer.parseInt(v.getTag().toString());
@@ -507,6 +493,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 //        }
         System.out.println("(button_right)numMode2:" + numMode);
         System.out.println("(button_right)numCount2:" + numCount);
+
+
 
         //翻訳判定(メソッド化する)
         if((numMode == NUMMODE_OFF)||(numCount == 4)||(numCount < 0)){
@@ -576,16 +564,14 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                 System.out.println("brailles = " + brailles2[i].getNumber());
                 break;
             }else{
-                //一致しなかった場合，ひらがなを表示しなければならない．その際，数字モードが溶ける(表示のみ，モード変換はaddText格納時)
+                //TODO 一致しなかった場合，ひらがなを表示しなければならない．その際，数字モードが溶ける(表示のみ，モード変換はaddText格納時)
                 addText="";
             }
         }
 
         toJResult.setText(translatedText + addText);
 
-        if(weight==0){
-            both_background_reset();
-        }
+        if(weight==0) both_background_reset();
 
     }
 
@@ -679,7 +665,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
         for(int i=0;i<6;i++){
             flag1[i]=0;
-            this.findViewById(idList_left[i]).setActivated(false);
+            left_buttons[i].setActivated(false);
         }
 
     }
@@ -689,7 +675,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
         for(int i=0;i<6;i++){
             flag2[i]=0;
-            this.findViewById(idList_right[i]).setActivated(false);
+            right_buttons[i].setActivated(false);
         }
 
     }
