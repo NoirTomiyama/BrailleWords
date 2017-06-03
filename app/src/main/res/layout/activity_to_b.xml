@@ -14,6 +14,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
         android:weightSum="20">
 
         <LinearLayout
@@ -155,19 +156,33 @@
             android:layout_weight="2"
             android:hint="ひらがな、数字のみ翻訳可能です" />
 
-        <Button
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:text="翻訳する"
-            android:id="@+id/translate"
-            android:layout_weight="2"
-            android:layout_gravity="center_horizontal"
-            android:onClick="translate" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/translate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="2"
+                android:onClick="translate"
+                android:text="翻訳する"/>
+
+            <Button
+                android:id="@+id/voice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:onClick="voice"
+                android:text="音声入力"/>
+        </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="7"></LinearLayout>
+            android:layout_weight="7"
+            android:orientation="vertical"></LinearLayout>
     </LinearLayout>
 </LinearLayout>
