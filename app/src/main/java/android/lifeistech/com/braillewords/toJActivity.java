@@ -258,11 +258,46 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         setListener();
     }
 
+    //クリックイベント管理
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            System.out.println("タップしてる？");
+            //左か右か判定メソッド
+            if(judgeField(v) == FIELD_LEFT){
+                button_left(v);
+            }else if(judgeField(v) == FIELD_RIGHT){
+                button_right(v);
+            }
+        }
+    };
+
     //ドラッグイベント発生
     private View.OnTouchListener onTouchListener = new View.OnTouchListener(){
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            v.startDrag(null,new View.DragShadowBuilder(null),v,0);
+
+            switch (event.getAction()) {
+
+                case MotionEvent.ACTION_MOVE:
+
+                    System.out.println("ドラッグしてる？");
+
+                    v.startDrag(null,new View.DragShadowBuilder(null),v,0);
+                    break;
+
+                case MotionEvent.ACTION_BUTTON_PRESS:
+
+                    System.out.println("タップしてる2？");
+
+                    //左か右か判定メソッド
+                    if(judgeField(v) == FIELD_LEFT){
+                        button_left(v);
+                    }else if(judgeField(v) == FIELD_RIGHT){
+                        button_right(v);
+                    }
+            }
+
             return false;
         }
     };
@@ -324,9 +359,12 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     private void setListener() {
 
         for(int i = 0;i<6;i++){
+
+            //left_buttons[i].setOnClickListener(onClickListener);
             left_buttons[i].setOnTouchListener(onTouchListener);
             left_buttons[i].setOnDragListener(dragListener);
 
+            //right_buttons[i].setOnClickListener(onClickListener);
             right_buttons[i].setOnTouchListener(onTouchListener);
             right_buttons[i].setOnDragListener(dragListener);
         }
@@ -391,11 +429,13 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             if(weight == 32) semi_voicedMode = SEMIVOICEDMODE_ON;
             System.out.println("(button_left)semi_voicedMode:" + semi_voicedMode);
 
-            if(weight == 60) numMode = NUMMODE_ON;
-            System.out.println("(button_left)numMode1:" + numMode);
-
-            if(numMode == NUMMODE_ON) numCount = translatedText.length() - temp_length;
-            System.out.println("(button_left)numCount1:" + numCount);
+            if(weight == 60) {
+                numMode = NUMMODE_ON;
+                //System.out.println("(button_left)numMode1:" + numMode);
+            }else if(numMode == NUMMODE_ON) {
+                numCount = translatedText.length() - temp_length;
+                System.out.println("(button_left)numCount1:" + numCount);
+            }
 
         }
         //タグ付けした整数の取得
