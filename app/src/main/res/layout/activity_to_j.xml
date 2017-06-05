@@ -112,6 +112,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="#00000000"
+                    android:elevation="0dp"
                     android:onClick="button_left"
                     android:scaleType="center"
                     android:src="@drawable/buttonchange"
