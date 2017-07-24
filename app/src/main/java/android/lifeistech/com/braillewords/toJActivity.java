@@ -22,7 +22,9 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
-public class toJActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+public class toJActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
+
+    //TODO 空白文字入力の実装
 
     //使用フィールド変数
     public final static int FIELD_LEFT = 0;
@@ -30,11 +32,24 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     //数字入力モード
     public final static boolean NUMMODE_ON = true;
     public final static boolean NUMMODE_OFF = false;
+
     //濁点，半濁点入力モード
-    public final static boolean VOICEDMODE_ON = true;
-    public final static boolean VOICEDMODE_OFF = false;
-    public final static boolean SEMIVOICEDMODE_ON = true;
-    public final static boolean SEMIVOICEDMODE_OFF = false;
+//    public final static boolean VOICEDMODE_ON = true;
+//    public final static boolean VOICEDMODE_OFF = false;
+//    public final static boolean SEMIVOICEDMODE_ON = true;
+//    public final static boolean SEMIVOICEDMODE_OFF = false;
+
+    public final static int NOMODE = 0;
+    public final static int VOICEDMODE = 1;
+    public final static int SEMIVOICEDMODE = 2;
+    public final static int CONTRACTEDMODE = 3;
+    public final static int CONTRACTED_VOICEMODE = 4;
+    public final static int CONTRACTED_SEMIVOICEDMODE = 5;
+
+
+//    //拗音モード
+//    public final static boolean CONTRACTEDMODE_ON = true;
+//    public final static boolean CONTRACTEDMODE_OFF = true;
 
     //ボタン押されたかどうか
     public final static int BUTTON_ON = 1;
@@ -42,8 +57,6 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     TextView toJResult;     //翻訳結果(今までの保持する)
     TextView inputNum;      //数字入力中テキスト
-
-
 
     //押下判定
     int[] flag1 = new int[6];
@@ -63,8 +76,10 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     //入力モード判定
     boolean numMode;
-    boolean voicedMode;
-    boolean semi_voicedMode;
+
+    int inputMode;
+//    boolean semi_voicedMode;
+//    boolean contractedMode;
 
     //数字入力制限(4まで)
     int temp_length = -1;
@@ -80,6 +95,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     //濁音，半濁音が入る
     public static Braille[] brailles3;
     public static Braille[] brailles4;
+    //拗音，拗濁音，拗半濁音が入る
+    public static Braille[] brailles5;
 
     private int[] weights1 = {
             1,3,9,11,10,        //あ行
@@ -91,9 +108,9 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             53,55,61,63,62,     //ま行
             12,44,28,           //や行
             17,19,25,27,26,     //ら行
-            4,6,100,20,          //わ行("ゑ"のみ別対処を考える．)
+            4,6,20,             //わ行
             52,2,18,            //ん行
-            50,48,100,34,22      //。、・？！(・について考える．)
+            50,48,16,34,22      //。、・？！
     };
 
     private String[] japaneses1 = {
@@ -106,7 +123,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             "ま","み","む","め","も",
             "や","ゆ","よ",
             "ら","り","る","れ","ろ",
-            "わ","ゐ","ゑ","を",
+            "わ","ゐ","を",
             "ん","っ","ー",
             "。","、","・","？","！"
     };
@@ -171,6 +188,50 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 //            "。","、","・","？","！"
     };
 
+    private int[] weights5 = {
+            33,41,42,   //きゃ，きゅ，きょ
+            49,57,58,   //しゃ，しゅ，しょ
+            21,29,30,   //ちゃ，ちゅ，ちょ
+            5,13,14,    //にゃ，にゅ，にょ
+            37,45,46,   //ひゃ，ひゅ，ひょ
+            53,61,62,   //みゃ，みゅ，みょ
+            17,25,26    //りゃ，りゅ，りょ
+    };
+
+    private String[] japaneses5 = {
+            "きゃ","きゅ","きょ",
+            "しゃ","しゅ","しょ",
+            "ちゃ","ちゅ","ちょ",
+            "にゃ","にゅ","にょ",
+            "ひゃ","ひゅ","ひょ",
+            "みゃ","みゅ","みょ",
+            "りゃ","りゅ","りょ"
+    };
+
+    private int[] weights6 = {
+            33,41,42,   //ぎゃ，ぎゅ，ぎょ
+            49,57,58,   //じゃ，じゅ，じょ
+            21,29,30,   //ぢゃ，ぢゅ，ぢょ
+            37,45,46,   //びゃ，びゅ，びょ
+    };
+
+    private String[] japaneses6 = {
+            "ぎゃ","ぎゅ","ぎょ",
+            "じゃ","じゅ","じょ",
+            "ぢゃ","ぢゅ","ぢょ",
+            "びゃ","びゅ","びょ"
+    };
+
+    private int[] weights7 = {
+            37,45,46   //ぴゃ，ぴゅ，ぴょ
+    };
+
+    private String[] japaneses7 = {
+            "ぴゃ","ぴゅ","ぴょ"
+    };
+
+
+
     private String [] numbers = {
             "0","1","2","3","4","5","6","7","8","9",".",","
     };
@@ -232,11 +293,13 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         }
 
         numMode = false;
+        inputMode = NOMODE;
         inputNum = (TextView)findViewById(R.id.inputNum);
         inputNum.setVisibility(View.INVISIBLE);
 
-        voicedMode = false;
-        semi_voicedMode = false;
+//        voicedMode = false;
+//        semi_voicedMode = false;
+//        contractedMode = false;
 
         //idList
         idList_left = new int[]{R.id.button1,R.id.button2,R.id.button3,R.id.button4,R.id.button5,R.id.button6};
@@ -256,21 +319,27 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         both_background_reset();
 
         setListener();
+
+        String a = "";
+        if(a.isEmpty()){
+            System.out.println("null");
+        }
+
     }
 
     //クリックイベント管理
-    private View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            System.out.println("タップしてる？");
-            //左か右か判定メソッド
-            if(judgeField(v) == FIELD_LEFT){
-                button_left(v);
-            }else if(judgeField(v) == FIELD_RIGHT){
-                button_right(v);
-            }
-        }
-    };
+//    private View.OnClickListener onClickListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            System.out.println("タップしてる？");
+//            //左か右か判定メソッド
+//            if(judgeField(v) == FIELD_LEFT){
+//                button_left(v);
+//            }else if(judgeField(v) == FIELD_RIGHT){
+//                button_right(v);
+//            }
+//        }
+//    };
 
     //ドラッグイベント発生
     private View.OnTouchListener onTouchListener = new View.OnTouchListener(){
@@ -286,16 +355,16 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                     v.startDrag(null,new View.DragShadowBuilder(null),v,0);
                     break;
 
-                case MotionEvent.ACTION_BUTTON_PRESS:
-
-                    System.out.println("タップしてる2？");
-
-                    //左か右か判定メソッド
-                    if(judgeField(v) == FIELD_LEFT){
-                        button_left(v);
-                    }else if(judgeField(v) == FIELD_RIGHT){
-                        button_right(v);
-                    }
+//                case MotionEvent.ACTION_BUTTON_PRESS:
+//
+//                    System.out.println("タップしてる2？");
+//
+//                    //左か右か判定メソッド
+//                    if(judgeField(v) == FIELD_LEFT){
+//                        button_left(v);
+//                    }else if(judgeField(v) == FIELD_RIGHT){
+//                        button_right(v);
+//                    }
             }
 
             return false;
@@ -418,21 +487,30 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             field = FIELD_LEFT;
 
             //移動してもONだったらOFFに
-            voicedMode = VOICEDMODE_OFF;
-            semi_voicedMode = SEMIVOICEDMODE_OFF;
+            if(inputMode != NOMODE){
+                inputMode = NOMODE;
+            }
 
+//            voicedMode = VOICEDMODE_OFF;
+//            semi_voicedMode = SEMIVOICEDMODE_OFF;
+//            contractedMode = CONTRACTEDMODE_OFF;
 
             //switch文で綺麗にできる．
-            if(weight == 16) voicedMode = VOICEDMODE_ON;
-            System.out.println("(button_left)voicedMode:" + voicedMode);
+            if(weight == 8) inputMode = CONTRACTEDMODE;
 
-            if(weight == 32) semi_voicedMode = SEMIVOICEDMODE_ON;
-            System.out.println("(button_left)semi_voicedMode:" + semi_voicedMode);
+
+            if(weight == 16) inputMode = VOICEDMODE;
+            System.out.println("(button_left)voicedMode:" + inputMode);
+
+            if(weight == 32) inputMode = SEMIVOICEDMODE;
+            System.out.println("(button_left)semi_voicedMode:" + inputMode);
 
             if(weight == 60) {
                 numMode = NUMMODE_ON;
                 //System.out.println("(button_left)numMode1:" + numMode);
-            }else if(numMode == NUMMODE_ON) {
+            }
+
+            if(numMode == NUMMODE_ON) {
                 numCount = translatedText.length() - temp_length;
                 System.out.println("(button_left)numCount1:" + numCount);
             }
@@ -485,14 +563,23 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             field = FIELD_RIGHT;
 
             //移動してもONだったらOFFに
-            voicedMode = VOICEDMODE_OFF;
-            semi_voicedMode = SEMIVOICEDMODE_OFF;
+            if(inputMode != NOMODE){
+                inputMode = NOMODE;
+            }
 
-            if(weight == 16) voicedMode = VOICEDMODE_ON;
-            System.out.println("(button_right)voicedMode:" + voicedMode);
+//            voicedMode = VOICEDMODE_OFF;
+//            semi_voicedMode = SEMIVOICEDMODE_OFF;
+//            contractedMode = CONTRACTEDMODE_OFF;
 
-            if(weight == 32) semi_voicedMode = SEMIVOICEDMODE_ON;
-            System.out.println("(button_right)semi_voicedMode:" + semi_voicedMode);
+
+            //switch文で綺麗にできる．
+            if(weight == 8) inputMode = CONTRACTEDMODE;
+
+            if(weight == 16) inputMode = VOICEDMODE;
+            System.out.println("(button_right)voicedMode:" + inputMode);
+
+            if(weight == 32) inputMode = SEMIVOICEDMODE;
+            System.out.println("(button_right)semi_voicedMode:" + inputMode);
 
             if(weight == 60) numMode = NUMMODE_ON;
             System.out.println("(button_right)numMode1:"+numMode);
@@ -638,7 +725,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             inputNum.setVisibility(View.INVISIBLE);
         }
 
-        if(voicedMode == VOICEDMODE_OFF && semi_voicedMode == VOICEDMODE_OFF){
+        if(inputMode == NOMODE){
             if(numMode == NUMMODE_OFF){
                 for(int i = 0;i < weights1.length;i++){
                     System.out.println("weight1 = " + weight);
@@ -666,7 +753,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                     }
                 }
             }
-        }else if(voicedMode == VOICEDMODE_ON){
+        }else if(inputMode == VOICEDMODE){
             for(int i = 0;i < weights3.length;i++){
                 System.out.println("weight3 = " + weight);
                 //System.out.println("brailles = " + brailles[i].getCode());
@@ -679,7 +766,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                     addText="";
                 }
             }
-        }else if(semi_voicedMode == SEMIVOICEDMODE_ON){
+        }else if(inputMode == SEMIVOICEDMODE){
             for(int i = 0;i < weights4.length;i++){
                 System.out.println("weight4 = " + weight);
                 //System.out.println("brailles = " + brailles[i].getCode());
@@ -692,6 +779,9 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                     addText="";
                 }
             }
+        }else if(inputMode == CONTRACTEDMODE){
+            //TODO 拗音モードの実装
+
         }
 
         toJResult.setText(translatedText + addText);
