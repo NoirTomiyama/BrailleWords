@@ -32,24 +32,17 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     //数字入力モード
     public final static boolean NUMMODE_ON = true;
     public final static boolean NUMMODE_OFF = false;
-
-    //濁点，半濁点入力モード
 //    public final static boolean VOICEDMODE_ON = true;
 //    public final static boolean VOICEDMODE_OFF = false;
 //    public final static boolean SEMIVOICEDMODE_ON = true;
 //    public final static boolean SEMIVOICEDMODE_OFF = false;
-
-    public final static int NOMODE = 0;
-    public final static int VOICEDMODE = 1;
-    public final static int SEMIVOICEDMODE = 2;
-    public final static int CONTRACTEDMODE = 3;
-    public final static int CONTRACTED_VOICEMODE = 4;
-    public final static int CONTRACTED_SEMIVOICEDMODE = 5;
-
-
-//    //拗音モード
-//    public final static boolean CONTRACTEDMODE_ON = true;
-//    public final static boolean CONTRACTEDMODE_OFF = true;
+    //入力モード
+    public final static int NOMODE = 0;         //モード無し
+    public final static int VOICEDMODE = 1;     //濁音モード
+    public final static int SEMIVOICEDMODE = 2; //半濁音モード
+    public final static int CONTRACTEDMODE = 3; //拗音モード
+    public final static int CONTRACTED_VOICEMODE = 4;       //拗濁音モード
+    public final static int CONTRACTED_SEMIVOICEDMODE = 5;  //拗半濁音モード
 
     //ボタン押されたかどうか
     public final static int BUTTON_ON = 1;
@@ -89,14 +82,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
     LinearLayout linearLayout_right; //右使用フィールド
 
     //50音が主に入る．
-    public static Braille[] brailles1;
-    //数字系がおもに入る．
-    public static Braille[] brailles2;
-    //濁音，半濁音が入る
-    public static Braille[] brailles3;
-    public static Braille[] brailles4;
-    //拗音，拗濁音，拗半濁音が入る
-    public static Braille[] brailles5;
+    //Braille[]の変数がbraillesで，tempとなるのがbraille
+    public static Braille[] brailles;
 
     private int[] weights1 = {
             1,3,9,11,10,        //あ行
@@ -110,7 +97,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             17,19,25,27,26,     //ら行
             4,6,20,             //わ行
             52,2,18,            //ん行
-            50,48,16,34,22      //。、・？！
+            50,48,100,34,22      //。、・？！(中点が濁点モードに被るため，weight=100を代入// ．)
     };
 
     private String[] japaneses1 = {
@@ -126,6 +113,14 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             "わ","ゐ","を",
             "ん","っ","ー",
             "。","、","・","？","！"
+    };
+
+    private int[] weights2 = {
+            26,1,3,9,25,17,11,27,19,10,2,4
+    };
+
+    private String [] numbers = {
+            "0","1","2","3","4","5","6","7","8","9",".",","
     };
 
     private int[] weights3 = {
@@ -230,16 +225,6 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             "ぴゃ","ぴゅ","ぴょ"
     };
 
-
-
-    private String [] numbers = {
-            "0","1","2","3","4","5","6","7","8","9",".",","
-    };
-
-    private int[] weights2 = {
-            26,1,3,9,25,17,11,27,19,10,2,4
-    };
-
     //id保持用配列
     int[] idList_left;
     int[] idList_right;
@@ -271,25 +256,51 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         linearLayout_right=(LinearLayout)findViewById(R.id.linearLayout2);
 
         //braillesの初期化
-        brailles1 = new Braille[64];
+        brailles = new Braille[64];
+        //50音
         for(int i = 0;i<weights1.length;i++){
-            Braille braille1 = new Braille(japaneses1[i],weights1[i]);
-            brailles1[i] = braille1;
+            Braille braille = new Braille(weights1[i],japaneses1[i]);
+            brailles[i] = braille;
         }
-        brailles2 = new Braille[64];
-        for(int i = 0;i<weights2.length;i++){
-            Braille braille2 = new Braille(weights2[i],numbers[i]);
-            brailles2[i] = braille2;
-        }
-        brailles3 = new Braille[64];
-        for(int i = 0;i<weights3.length;i++){
-            Braille braille3 = new Braille(japaneses3[i],weights3[i]);
-            brailles3[i] = braille3;
-        }
-        brailles4 = new Braille[64];
-        for(int i = 0;i<weights4.length;i++){
-            Braille braille4 = new Braille(japaneses4[i],weights4[i]);
-            brailles4[i] = braille4;
+
+        for(int i = 0;i<weights1.length;i++){
+            //数字
+            for(int j = 0;j<weights2.length;j++){
+                if(weights1[i] == weights2[j]){
+                    brailles[i].setNumber(numbers[j]);
+                }
+            }
+            //濁音
+            for(int j = 0;j<weights3.length;j++){
+                if(weights1[i] == weights3[j]){
+                    brailles[i].setVoiced(japaneses3[j]);
+                    //System.out.println(brailles[i].getVoiced());
+                }
+            }
+            //半濁音
+            for(int j = 0;j<weights4.length;j++){
+                if(weights1[i] == weights4[j]){
+                    brailles[i].setSemiVoiced(japaneses4[j]);
+                }
+            }
+            //拗音
+            for(int j = 0;j<weights5.length;j++){
+                if(weights1[i] == weights5[j]){
+                    brailles[i].setContracted(japaneses5[j]);
+                }
+            }
+            //拗濁音
+            for(int j = 0;j<weights6.length;j++){
+                if(weights1[i] == weights6[j]){
+                    brailles[i].setContractedVoiced(japaneses6[j]);
+                }
+            }
+            //拗半濁音
+            for(int j = 0;j<weights7.length;j++){
+                if(weights1[i] == weights7[j]){
+                    brailles[i].setContractedSemiVoiced(japaneses7[j]);
+                }
+            }
         }
 
         numMode = false;
@@ -320,10 +331,10 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
         setListener();
 
-        String a = "";
-        if(a.isEmpty()){
-            System.out.println("null");
-        }
+//        String a = "";
+//        if(a.isEmpty()){
+//            System.out.println("null");
+//        }
 
     }
 
@@ -497,7 +508,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
             //switch文で綺麗にできる．
             if(weight == 8) inputMode = CONTRACTEDMODE;
-
+            if(weight == 24) inputMode = CONTRACTED_VOICEMODE;
+            if(weight == 40) inputMode = CONTRACTED_SEMIVOICEDMODE;
 
             if(weight == 16) inputMode = VOICEDMODE;
             System.out.println("(button_left)voicedMode:" + inputMode);
@@ -574,6 +586,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
             //switch文で綺麗にできる．
             if(weight == 8) inputMode = CONTRACTEDMODE;
+            if(weight == 24) inputMode = CONTRACTED_VOICEMODE;
+            if(weight == 40) inputMode = CONTRACTED_SEMIVOICEDMODE;
 
             if(weight == 16) inputMode = VOICEDMODE;
             System.out.println("(button_right)voicedMode:" + inputMode);
@@ -688,9 +702,9 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             System.out.println("weight2 = " + weight);
             //System.out.println("brailles = " + brailles[i].getCode());
 
-            if(weight == brailles2[i].getWeight()){
-                addText = brailles2[i].getNumber();
-                System.out.println("brailles = " + brailles2[i].getNumber());
+            if(weight == brailles[i].getWeight()){
+                addText = brailles[i].getNumber();
+                System.out.println("brailles = " + brailles[i].getNumber());
                 break;
             }else{
                 //TODO 一致しなかった場合，ひらがなを表示しなければならない．その際，数字モードが溶ける(表示のみ，モード変換はaddText格納時)
@@ -731,22 +745,22 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                     System.out.println("weight1 = " + weight);
                     //System.out.println("brailles = " + brailles[i].getCode());
 
-                    if(weight == brailles1[i].getWeight()){
-                        addText = brailles1[i].getS_japanese();
-                        System.out.println("brailles = " + brailles1[i].getS_japanese());
+                    if(weight == brailles[i].getWeight()){
+                        addText = brailles[i].getUnVoiced();
+                        System.out.println("brailles = " + brailles[i].getUnVoiced());
                         break;
                     }else{
                         addText="";
                     }
                 }
             }else if(numMode == NUMMODE_ON){
-                for(int i = 0;i < weights2.length;i++){
+                for(int i = 0;i < weights1.length;i++){
                     System.out.println("weight2 = " + weight);
                     //System.out.println("brailles = " + brailles[i].getCode());
 
-                    if(weight == brailles2[i].getWeight()){
-                        addText = brailles2[i].getNumber();
-                        System.out.println("brailles = " + brailles2[i].getNumber());
+                    if(weight == brailles[i].getWeight()){
+                        addText = brailles[i].getNumber();
+                        System.out.println("brailles = " + brailles[i].getNumber());
                         break;
                     }else{
                         addText="";
@@ -754,26 +768,27 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
                 }
             }
         }else if(inputMode == VOICEDMODE){
-            for(int i = 0;i < weights3.length;i++){
+            for(int i = 0;i < weights1.length;i++){
                 System.out.println("weight3 = " + weight);
+                System.out.println("brailles[i].getWeight() = " + brailles[i].getWeight());
                 //System.out.println("brailles = " + brailles[i].getCode());
 
-                if(weight == brailles3[i].getWeight()){
-                    addText = brailles3[i].getS_japanese();
-                    System.out.println("brailles = " + brailles3[i].getS_japanese());
+                if(weight == brailles[i].getWeight()){
+                    addText = brailles[i].getVoiced();
+                    System.out.println("brailles = " + brailles[i].getVoiced());
                     break;
                 }else{
                     addText="";
                 }
             }
         }else if(inputMode == SEMIVOICEDMODE){
-            for(int i = 0;i < weights4.length;i++){
+            for(int i = 0;i < weights1.length;i++){
                 System.out.println("weight4 = " + weight);
                 //System.out.println("brailles = " + brailles[i].getCode());
 
-                if(weight == brailles4[i].getWeight()){
-                    addText = brailles4[i].getS_japanese();
-                    System.out.println("brailles = " + brailles4[i].getS_japanese());
+                if(weight == brailles[i].getWeight()){
+                    addText = brailles[i].getSemiVoiced();
+                    System.out.println("brailles = " + brailles[i].getSemiVoiced());
                     break;
                 }else{
                     addText="";
@@ -781,7 +796,41 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             }
         }else if(inputMode == CONTRACTEDMODE){
             //TODO 拗音モードの実装
+            for(int i = 0;i < weights1.length;i++){
+                System.out.println("weight5 = " + weight);
 
+                if(weight == brailles[i].getWeight()){
+                    addText = brailles[i].getContracted();
+                    System.out.println("brailles = " + brailles[i].getContracted());
+                    break;
+                }else{
+                    addText="";
+                }
+            }
+        }else if(inputMode == CONTRACTED_VOICEMODE){
+            for(int i = 0;i < weights1.length;i++){
+                System.out.println("weight6 = " + weight);
+
+                if(weight == brailles[i].getWeight()){
+                    addText = brailles[i].getContractedVoiced();
+                    System.out.println("brailles = " + brailles[i].getContractedVoiced());
+                    break;
+                }else{
+                    addText="";
+                }
+            }
+        }else if(inputMode == CONTRACTED_SEMIVOICEDMODE){
+            for(int i = 0;i < weights1.length;i++){
+                System.out.println("weight7 = " + weight);
+
+                if(weight == brailles[i].getWeight()){
+                    addText = brailles[i].getContractedSemiVoiced();
+                    System.out.println("brailles = " + brailles[i].getContractedSemiVoiced());
+                    break;
+                }else{
+                    addText="";
+                }
+            }
         }
 
         toJResult.setText(translatedText + addText);
@@ -850,6 +899,7 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         both_flags_reset();
 
         numMode = NUMMODE_OFF;
+        inputMode = NOMODE;
         temp_length = -1;
         numCount = 0;
         inputNum.setVisibility(View.INVISIBLE);
