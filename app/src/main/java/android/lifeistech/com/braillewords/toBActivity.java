@@ -114,8 +114,8 @@ public class toBActivity extends AppCompatActivity {
 
         for(int i = 0; i < charArray.length;i++){
             for(int j = 0; j < res.length;j++){
-                if(charArray[i] == brailles[j].getC_japanese()){
-                    res_data[i] = brailles[j].getRes();
+                if(charArray[i] == brailles[j].getJapanese()){
+                    res_data[i] = brailles[j].getResId();
                     break;
                 }
             }

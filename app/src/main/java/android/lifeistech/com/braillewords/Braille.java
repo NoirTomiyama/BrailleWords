@@ -2,56 +2,127 @@ package android.lifeistech.com.braillewords;
 
 public class Braille {
 
-    private String code;
     private int weight;
-    private char c_japanese;
-    private String s_japanese;
-    private int res;
+    private String unVoiced;
     private String number;
+    private String voiced;
+    private String semiVoiced;
+    private String contracted;
+    private String contractedVoiced;
+    private String contractedSemiVoiced;
 
-    Braille() {
+    private int resId;
+    private char japanese;
+
+    Braille(){
+
     }
 
-    Braille(int weight,String number) {
-        this.number = number;
+    public int getResId() {
+        return resId;
+    }
+
+    public void setResId(int resId) {
+        this.resId = resId;
+    }
+
+    public char getJapanese() {
+        return japanese;
+    }
+
+    public void setJapanese(char japanese) {
+        this.japanese = japanese;
+    }
+
+    Braille(int resId, char japanese){
+        this.resId = resId;
+        this.japanese = japanese;
+
+    }
+
+    Braille(int weight,String unVoiced) {
         this.weight = weight;
+        this.unVoiced = unVoiced;
+        this.number = "";
+        this.voiced = "";
+        this.semiVoiced = "";
+        this.contracted = "";
+        this.contractedVoiced = "";
+        this.contractedSemiVoiced = "";
     }
 
-    public String getNumber() {
-        return number;
-    }
-    Braille(String code, char japanese) {
-        this.code = code;
-        this.c_japanese = japanese;
-    }
-
-    Braille(String japanese,int weight) {
-        this.s_japanese = japanese;
-        this.weight = weight;
-    }
+//    Braille(int weight,String unVoiced,String number,String voiced,String semiVoiced,String contracted,String contractedVoiced,String contractedSemiVoiced) {
+//        this.weight = weight;
+//        this.unVoiced = unVoiced;
+//        this.number = number;
+//        this.voiced = voiced;
+//        this.semiVoiced = semiVoiced;
+//        this.contracted = contracted;
+//        this.contractedVoiced = contractedVoiced;
+//        this.contractedSemiVoiced = contractedSemiVoiced;
+//    }
 
     public int getWeight() {
         return weight;
     }
 
-    Braille(int res, char japanese) {
-        this.res = res;
-        this.c_japanese = japanese;
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
-    public String getCode() {
-        return code;
+    public String getUnVoiced() {
+        return unVoiced;
     }
 
-    public char getC_japanese() {
-        return c_japanese;
+    public void setUnVoiced(String unVoiced) {
+        this.unVoiced = unVoiced;
     }
 
-    public String getS_japanese() {
-        return s_japanese;
+    public String getNumber() {
+        return number;
     }
 
-    public int getRes(){
-        return res;
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public String getVoiced() {
+        return voiced;
+    }
+
+    public void setVoiced(String voiced) {
+        this.voiced = voiced;
+    }
+
+    public String getSemiVoiced() {
+        return semiVoiced;
+    }
+
+    public void setSemiVoiced(String semiVoiced) {
+        this.semiVoiced = semiVoiced;
+    }
+
+    public String getContracted() {
+        return contracted;
+    }
+
+    public void setContracted(String contracted) {
+        this.contracted = contracted;
+    }
+
+    public String getContractedVoiced() {
+        return contractedVoiced;
+    }
+
+    public void setContractedVoiced(String contractedVoiced) {
+        this.contractedVoiced = contractedVoiced;
+    }
+
+    public String getContractedSemiVoiced() {
+        return contractedSemiVoiced;
+    }
+
+    public void setContractedSemiVoiced(String contractedSemiVoiced) {
+        this.contractedSemiVoiced = contractedSemiVoiced;
     }
 }
