@@ -884,6 +884,8 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
             }
         }
 
+        //追加
+        weight = 0;
 
         toJResult.setText(translatedText);
 
@@ -902,6 +904,10 @@ public class toJActivity extends AppCompatActivity implements TextToSpeech.OnIni
         inputMode = NOMODE;
         temp_length = -1;
         numCount = 0;
+
+        //追加
+        weight = 0;
+
         inputNum.setVisibility(View.INVISIBLE);
 
         addText = "";
